@@ -1,0 +1,39 @@
+# Sidebar navigation
+
+- label: 'Who am I ?'
+  link: '/'
+
+- label: 'Find me'
+  link: '/contact'
+
+- label: Recent Projects
+  items:
+    - label: 'Developers Community'
+      link: '/projects/CDC'
+    - label: 'DashB - No code ML'
+      link: '/usage/navigation'
+    - label: 'DashViz - A Visualization Tool'
+      link: '/usage/shadowing'
+
+- label: My Notes | Blog
+  items:
+    - label: 'Data Visualization'
+      link: '/usage/shadowing'
+    - label: 'Web Scrapping'
+      link: '/usage/creating-docs'
+    - label: 'Machine Learning'
+      link: '/usage/navigation'
+    - label: 'Deep Learning'
+      link: '/usage/shadowing'
+
+- label: Another
+  items:
+    - label: FAQ
+      link: /faq
+    - label: Changelog
+      link: /changelog
+
+- label: Community
+  items:
+    - label: 'Github'
+      link: https://github.com/IMSumitKumar
