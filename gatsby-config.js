@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    siteTitle: `Sumit | My Learning`,
+    siteTitle: `FindingData`,
     defaultTitle: `Sumit | My Learning`,
     siteTitleShort: `Sumit`,
     siteDescription: `A personal and blogspot website for data Scientist`,
