@@ -11,9 +11,9 @@
     - label: 'Developers Community'
       link: '/projects/CDC'
     - label: 'DashB - No code ML'
-      link: '/usage/navigation'
+      link: '/projects/dashb'
     - label: 'DashViz - A Visualization Tool'
-      link: '/usage/shadowing'
+      link: '/projects/dashviz'
 
 - label: My Notes | Blog
   items:

@@ -4,7 +4,7 @@ module.exports = {
     defaultTitle: `Sumit | My Learning`,
     siteTitleShort: `Sumit`,
     siteDescription: `Out of the box Gats by Theme for creating documentation and portfolio websites easily and quickly`,
-    siteUrl: `https://www.gatsbyjs.com/`,
+    siteUrl: `https://www.findingdata.ml/`,
     siteAuthor: `@sumit`,
     siteImage: `/favicon.png`,
     siteLanguage: `en`,
