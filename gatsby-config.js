@@ -18,7 +18,7 @@ module.exports = {
         configPath: `src/config`,
         docsPath: `src/docs`,
         githubUrl: `https://github.com/IMSumitKumar`,
-        baseDir: `examples/gatsby-theme-docs`,
+        baseDir: `findingdata.ml`,
       },
     },
     {
@@ -43,7 +43,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: `https://rocketdocs.netlify.com`,
+        siteUrl: `https://dazzling-williams-3d5af9.netlify.com`,
       },
     },
     `gatsby-plugin-offline`,

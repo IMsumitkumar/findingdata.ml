@@ -14,6 +14,8 @@
       link: '/projects/dashb'
     - label: 'DashViz - A Visualization Tool'
       link: '/projects/dashviz'
+    - label: 'More ...'
+      link: '/projects/all-projects'
 
 - label: My Notes | Blog
   items:
@@ -25,14 +27,7 @@
       link: '/usage/navigation'
     - label: 'Deep Learning'
       link: '/usage/shadowing'
-
-- label: Another
-  items:
-    - label: FAQ
-      link: /faq
-    - label: Changelog
-      link: /changelog
-
+      
 - label: Community
   items:
     - label: 'Github'
