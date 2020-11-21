@@ -6,7 +6,6 @@ module.exports = {
     siteDescription: `A personal and blogspot website for data Scientist`,
     siteUrl: `https://www.findingdata.ml/`,
     siteAuthor: `@sumitkumar`,
-    siteImage: ``,
     siteLanguage: `en`,
     themeColor: `#8257E6`,
     basePath: `/`,
