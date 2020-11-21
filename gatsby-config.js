@@ -1,11 +1,11 @@
 module.exports = {
   siteMetadata: {
     siteTitle: `FindingData`,
-    defaultTitle: `Sumit | My Learning`,
+    defaultTitle: `FindingData`,
     siteTitleShort: `Sumit`,
     siteDescription: `A personal and blogspot website for data Scientist`,
     siteUrl: `https://www.findingdata.ml/`,
-    siteAuthor: `@sumit`,
+    siteAuthor: `@sumitkumar`,
     siteImage: ``,
     siteLanguage: `en`,
     themeColor: `#8257E6`,
