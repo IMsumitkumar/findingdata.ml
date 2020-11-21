@@ -24,18 +24,18 @@
 
 - label: My Notes | Blog
   items:
+    - label: 'Data Science'
+      link: '/notes/DS/all-collection'
+
     - label: 'Statistics'
       link: 'notes/stats/all-stats'
-    - label: 'Data Collection'
-      link: '/notes/WEB/all-collection'
-    - label: 'Data Prepration'
-      link: '/notes/DREP/all-dprep'
-    - label: 'Data Visualization'
-      link: '/notes/VIZ/all-viz'
+
     - label: 'Machine Learning'
       link: '/notes/ML/all-ml'
+
     - label: 'Deep Learning'
       link: '/notes/DL/all-dl'
+
     - label: 'Deployment'
       link: '/notes/deploy/all-deploy'
       
