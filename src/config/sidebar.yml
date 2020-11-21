@@ -17,16 +17,27 @@
     - label: 'More ...'
       link: '/projects/all-projects'
 
+- label: Roadmap
+  items:
+    - label: 'Roadmap'
+      link: '/roadmap/roadmap'
+
 - label: My Notes | Blog
   items:
+    - label: 'Statistics'
+      link: 'notes/stats/all-stats'
+    - label: 'Data Collection'
+      link: '/notes/WEB/all-collection'
+    - label: 'Data Prepration'
+      link: '/notes/DREP/all-dprep'
     - label: 'Data Visualization'
-      link: '/usage/shadowing'
-    - label: 'Web Scrapping'
-      link: '/usage/creating-docs'
+      link: '/notes/VIZ/all-viz'
     - label: 'Machine Learning'
-      link: '/usage/navigation'
+      link: '/notes/ML/all-ml'
     - label: 'Deep Learning'
-      link: '/usage/shadowing'
+      link: '/notes/DL/all-dl'
+    - label: 'Deployment'
+      link: '/notes/deploy/all-deploy'
       
 - label: Community
   items:
