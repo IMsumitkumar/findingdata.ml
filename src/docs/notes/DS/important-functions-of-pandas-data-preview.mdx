@@ -1,0 +1,177 @@
+---
+title: Important functions of pandas - Data Preview
+description: Most important functions of python pandas you will use in your daily tasks while dealing with data like data manipulation, data cleaning, transformation and aggregation.
+---
+Nov 22, 2020
+
+Before reading this, I suggest you read the previous post [Intro and data I/O with pandas](/notes/DS/pandas/)
+
+
+![img](https://i.imgur.com/pkXMYXM.png)
+
+As one of the most powerful python library for data manipulation, pandas is a **must learn** library for data I/O, data manipulation, data cleaning, 
+data transformation, data aggregation and a lot and yes pandas is open source.
+
+In this post, I haven't covered all the functions that pandas provide but some of them which frequently used by us while dealing with data 
+So what are we waiting for. let's see one by one
+
+## Notation
+
+```
+df      <--> dataframe
+columns <--> features
+rows    <--> records
+```
+
+## Create DataFrame
+
+DataFrame is a data structure of pandas. If your data is typeof dataframe then u can apply all the functions that pandas provides.
+
+```python title=padas-python
+df = pd.DataFrame({
+    "id":[1,2,3,4,5,6,7],
+    "Name":['sumit', 'lalit', 'bob', 'vineet', 'pankaj', 'mehek', 'kajal']
+})
+df
+```
+![img](https://i.imgur.com/zvtRtVY.png)
+
+## Load the dataset 
+
+Download Dataset from [here](https://www.kaggle.com/c/titanic/data?select=train.csv)
+
+```python highlight={2-3}
+import pandas as pd    
+df = pd.read_csv("titanic.csv")
+```
+
+![img](https://i.imgur.com/zpVnUUs.png)
+
+## Data preview
+
+Before working on a problem we often want to know how is our problem look like what is the problem. Similiarly while woorking with datasets
+we want to get the general picture of our dataset we have, or whether our dataset is loaded into pandas dataframe or not. to do such, we will need
+to know some functions...
+
+### head : preview the first n (default=5)
+
+`head` shows top n records from your dataset. well `n=5` is default but you can always specify how many rows to show as `df.head(10)` to show top 10 records.
+```
+ df.head()
+``` 
+![img](https://i.imgur.com/eqwFxr6.png)
+
+### tail : preview the last n (default=5)
+
+`tail` is similiar to head `tail` shows last n records from the dataset. you can specify how many rows to show as `df.tail(10)` to show last 10 records.If you
+ didn't specify anything then it will show last 5 records by default.
+
+```
+df.tail()
+``` 
+![img](https://i.imgur.com/4OAW0HY.png)
+
+### info : display basic info of data
+
+`info` display all the basic information of your dataframe like 
+- data types of each feature
+- shape of DataFrame 
+- Non Null Count for each feature
+- memory usage
+
+```
+df.info()
+```
+![img](https://i.imgur.com/zqmfrSu.png)
+
+### sort values : Sort a specific column
+
+`sort_values` function will sort given column based on the data it have in ascending or descending order.
+- If column have text data then it will arrange in alphabetical order or if it have number than it will sort according to natural numbers.
+- `inplace` is set to be `true` if you want to assign  the sorted  data frame back to your variable. Otherwise your `dataframe` will not be changed.
+
+```python
+df.sort_values(by='Name', ascending=True, inplace=True)
+```
+![img](https://i.imgur.com/vuilDJL.png)
+
+### columns : display all the columns
+
+`columns` is a dataframe property not a function which display all the columns(features) that your dataframe have.
+
+```
+df.columns
+```
+![img](https://i.imgur.com/5dkoxpv.png)
+
+
+### dtypes : display datatypes of columns
+
+`dtypes` is a dataframe property not a function which display datatypes of each feature. It is very helpful when you want to check datatypes
+for all the columns(features).
+
+```
+df.dtypes
+```
+![img](https://i.imgur.com/dtUQo7A.png)
+
+
+### shape : display the shape of dataframe
+
+`shape` is also not a function, It is a property of dataframe which display count of all rows and columns in `(R, C)` format.
+where `R` refers to totoal number of rows (records) and `C` refers to number of columns (features).
+
+```python 
+df.shape
+```
+
+![img](https://i.imgur.com/rl1oC0D.png)
+
+### describe : show basic stats of each column
+ 
+`describe()` display all the basic stats for each numerical feature.It basically gives you the basic picture of data distribution.
+
+It ignores Categorical and other features, it only considers numerical features.
+
+```
+df.describe()
+```
+![img](https://i.imgur.com/JFEIeX8.png)
+
+### value counts : Count occurance of each column
+
+- `value_counts()` function applies on a pandas series rather than a pandas dataframe or we can say for a single column.    
+- It counts the occurance of each value in the series whether numerical or Categorical.
+
+```
+df.Sex.value_counts()
+```
+![img](https://i.imgur.com/PfuPTHC.png)
+
+### unique : display each Category from column 
+
+`unique()` display all the unique Categories of singe column. It is good to apply when there is a categorical feature, to see whether can one handle it by creating
+a simple dictionary and mapping dictionary or not (we will discuss it later).
+
+```python title=python
+df['Sex'].unique()
+```
+![img](https://i.imgur.com/Kr3Okad.png)
+
+### select datatypes : seperate datatypes
+
+Sometimes you need to work based on numerical, categorical, and datetime datatypes seperatly so that you can handle them individually so you can 
+simply seperate all the different types of features by `select_dtypes`. `include` takes a `list of datatypes` inside `select_dtypes` as an argument.
+
+```python  title=python 
+num = df.select_dtypes(include=['int64', 'float64']).columns
+cat = df.select_dtypes(include=['object']).columns
+dt = df.select_dtypes(include=['datetime64[ns]']).columns
+
+print("Numerical Columns :",num)
+print("Categorical Columns :",cat)
+print("datetime Columns :",dt)
+```
+![img](https://i.imgur.com/MGyJzDa.png)
+
+> Indeed, the Pandas library of Python has a lot more functions that makes it such a flexible and powerful data analytics tool in Python. In this post, I just organised the basic ones that I believe are the most useful. 
