@@ -1,0 +1,80 @@
+---
+title: Reading and Writing files using python  🗂 
+description: A beginners guide for working with files
+---
+
+![img](https://i.imgur.com/NzMM2W9.png)
+
+Files input/ouput is the basic and the important skill that a developer should have. If you want to do basic oeration with files or create scripts or diving into data
+science, you must have that skill which is fortunately easy to implement.
+
+In this post we will learn how to read and write file using python which makes these operation more easier.
+
+
+### 📖 Opening Files
+
+Before going to reading and writing files, first let’s know how to open files uisng `open()` function, which creates the file pointer stored in a variable in the memory.
+ then we need to specify in which way we are planning to interact with the files.
+
+There are four modes to interact with a file:
+
+read(x) | write(x) | append(x) | create(x)
+
+so, let’s look how we can open the file
+
+`filename = 'file.ext'`
+
+```python highlight={4-5} title=python
+with open(filename, "r") as f:
+   print(f)
+
+OUTPUT:
+# <_io.TextIOWrapper name='file.ext' mode='r' encoding='cp1252'>
+```
+
+first we assign the file in a variable called `filename` then we used `with` keyword which automatically close the pointer at the end of the block, with the `open()` function
+to create a read file pointer with is referred as `f`.
+
+OUTPUT is not the content of the files but rather the `pointer's information`
+
+
+### 📄 Reading Files
+
+There are three methods to choose for reading file
+
+
+1. `read()` : will return the entire file.
+2. `readline()` : will return a single line .
+3. `readlines()` : will return the entire file line by line .
+
+```python title=python
+with open(filename, "r") as f:
+   print(f.read())                   # it will print the entire file
+  
+   lines = f.readlines()
+   for line in lines:
+      print(line)               # it will print line by line at time
+```
+
+### 📝 Writing Files
+
+There are two write methods
+
+1. `write()` : If your goal is to write as if new, then use write (w) mode. This will erase any existing content in your file. If you want to preserve the current contents, then use 
+append (a) mode and your new content will be written to the end of the file.
+2. `writelines()` : it is similiar to readlines() from reading files.
+
+
+```python title=python
+one_line_string = "Hello World!"
+multiline = ["Hello World!", "Write some code"]
+with open(filename, "r") as f:
+   f.write(one_line_string)
+   f.writelines(multiline)
+
+```
+
+---
+<br />
+
+> there is a lot of you can do with files far from only reading and writing. but as for general purpose this is enough.

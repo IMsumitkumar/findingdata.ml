@@ -5,6 +5,7 @@ module.exports = {
     siteTitleShort: `Sumit`,
     siteDescription: `A personal and blogspot website for data Scientist`,
     siteUrl: `https://www.findingdata.ml/`,
+    siteImage: '',
     siteAuthor: `@sumitkumar`,
     siteLanguage: `en`,
     themeColor: `#8257E6`,
@@ -16,8 +17,8 @@ module.exports = {
       options: {
         configPath: `src/config`,
         docsPath: `src/docs`,
-        githubUrl: `https://github.com/IMSumitKumar`,
-        baseDir: `findingdata.ml`,
+        githubUrl: `https://github.com/IMSumitKumar/findingdata.ml`,
+        baseDir: ``,
       },
     },
     {

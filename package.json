@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "A personal and blogspot website for data Scientist",
-  "author": "João Pedro Schmitz <oi@joaopedro.cc> (@jpedroschmitz)",
+  "author": "Sumit Kumar",
   "license": "MIT",
   "starter-name": "sumit-portfolio",
   "dependencies": {
@@ -16,6 +16,7 @@
     "gatsby-plugin-offline": "^3.2.30",
     "gatsby-plugin-remove-trailing-slashes": "^2.3.13",
     "gatsby-plugin-sitemap": "^2.4.14",
+    "gatsby-remark-emojis": "^0.4.3",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

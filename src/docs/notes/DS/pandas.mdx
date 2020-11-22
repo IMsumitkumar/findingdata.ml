@@ -1,0 +1,196 @@
+---
+title: pandas 🐼
+description: All you need from pandas 
+---
+
+
+## 🤔 what is pandas ?
+
+![img](https://i.imgur.com/8iWzHrI.png)
+
+pandas is the most powerful library for doing data manipulation and analysis out there.
+pandas is like excel for python, with tables [which in padas are called `DataFrames` ,
+and rows and columns [which in pandas called `Series`
+
+## 📚 Working with various files format
+
+If you know a little bit about data, we generally see .csv file format or .txt file format 
+around us at the beginner level or even in kaggle like platform but at the industry level 
+we have to deal with more complex dataset and type also. data can be in any file format like 
+Binary file format or json format etc. so dealing with these file format becomes little bit though.
+
+In this post, we will see how can we read and write diffrent type of file format using pandas.
+
+### File Reading and Writing with pandas
+
+![img](https://i.imgur.com/PqhrqY0.png)
+
+![img](https://i.imgur.com/OjVVYia.png)
+
+![img](https://i.imgur.com/L6E3Rlb.png)
+
+## 📥 Loading data
+
+we will load all the basic and important file formats and will try to understand
+
+### Env Setup and pandas Installation
+
+It is a best practice to create a virtual environment and install the neccessary
+packages inside the virtualenv.
+
+**Create virtualenv using anaconda**
+
+```bash title=python>3.6
+conda create -n new_env python=3.7
+conda activate new_env
+```
+
+**Install Pandas and jupyter notebook**
+```bash
+pip install jupyter
+pip install pandas
+```
+
+## 🐼 Loading data with pandas
+
+With pandas, we can load data having diffrent file formats.We will cover following
+
+- .txt — text file
+- .csv — comma seperated value
+- .tsv — tab seperated value
+- .html — hyper text markup language
+- .json — javascript object notation
+- Binary data format ( pickle, hd5 )
+- Web APIs
+- Database
+- pdf
+
+### From txt File
+
+```python title=path-filename.txt
+import pandas as pd
+df = pd.read_csv("path_to_text_file", sep="")
+```
+
+### From csv file
+
+```python title=python
+import pandas as pd
+df = pd.read_csv("path_to_csv_file") # default par -> sep=","
+```
+
+### From Remote URL
+
+```python title=python 
+import pandas as pd
+df = pd.read_csv("remote_url_path")
+
+Eg : 
+```
+### From tsv File
+
+```python title=python
+import pandas as pd
+df = pd.read_csv("path_to_tsv_file", sep="\t")
+```
+
+### From HTML File
+
+```python title=python highlight={4-6}
+url = "http://www.basketball-reference.com/leagues/NBA_2015_totals.html"
+tables = pd.read_html(url)     
+
+# List   
+# Read data which is inside the tables. if more than one table then you can
+# access using list operations.
+```
+
+### From Json Data
+
+```python title=python
+obj = """
+    {"name": "Wes",
+     "places_lived": ["United States", "Spain", "Germany"],
+     "pet": null,
+     "siblings": [{"name": "Scott", "age": 30,
+                   "pets": ["Zeus", "Zuko"]},
+                  {"name": "Katie", "age": 38,
+                   "pets": ["Sixes", "Stache", "Cisco"]}]
+    }
+    """
+import json
+import pandas as pd
+loaded = json.loads(obj)    # dict
+json_data = json.dumps(loaded)  # str
+siblings = pd.DataFrame(loaded['siblings'], columns=['name', 'age', 'pets';])
+
+```
+
+![img](https://i.imgur.com/CLtTZUZ.png)
+
+### Binary Data Format (pickle)
+
+```python title=https://github.com/IMsumitkumar/Internshala-jobs-scrapping/blob/main/scrapped-dataset/DELHI.csv
+import pandas as pd
+pd.read_pickle('path_to_pkl_filr')
+```
+
+### Web API
+
+```python highlight={6-6} title=python
+import requests
+url = 'https://api.github.com/repos/pandas-dev/pandas/issues'
+resp = requests.get(url)
+resp
+
+# if resp -> <Response [200]> -> Accessable! Good to go
+
+data = resp.json()
+data[2]
+```
+
+![img](https://i.imgur.com/NypsHd3.png)
+
+---
+let say i want to grab user data in 2nd issue
+
+```python highlight={5-5} title=python
+data = pd.DataFrame.from_dict(data)
+df = data['user'].apply(pd.Series)
+type(df)
+
+< pandas.core.frame.DataFrame >
+```
+
+### From DataBase
+
+In order to read from Database, read the data from DB into a python
+list and use `DataFrame()` to create one
+```python title=python
+import pandas as pd
+
+db = # Create DB connection object 
+cur = db.cursor()
+cur.execute("SELECT * FROM <TABLE>")
+df = pd.DataFrame(cur.fetchall())
+
+```
+
+
+### from pdf
+
+```python title=python
+
+import tabula
+
+# Read PDF into list of DataFrame
+dataframe = tabula.read_pdf("input.pdf", pages='all')
+
+# Convert PDF into CSV file
+tabula.convert_into("input.pdf", "output.csv", output_format="csv", pages='all')
+
+# Read remote PDF into list of DataFrame
+dataframe_2 = tabula.read_pdf("https://github.com/tabulapdf/tabula-java/raw/master/src/test/resources/technology/tabula/arabic.pdf")
+```
+
+[stackoverflow Source for data reading from pdf](https://aegis4048.github.io/parse-pdf-files-while-retaining-structure-with-tabula-py)
