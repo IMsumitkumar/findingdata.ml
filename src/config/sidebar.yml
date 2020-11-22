@@ -1,7 +1,10 @@
 # Sidebar navigation
 
-- label: 'Who am I ?'
+- label: 'Recent Posts'
   link: '/'
+
+- label: 'Who am I ?'
+  link: '/me'
 
 - label: 'Find me'
   link: '/contact'
