@@ -1,0 +1,101 @@
+---
+title: Important functions of pandas - Data Transformation
+image01: ../images/pandas.png
+imge01alt: Some important data transformation functions in pandas
+description: Most important functions of python pandas you will use in your daily tasks while dealing with data like data manipulation, data cleaning, transformation and aggregation.
+---
+23 Nov, 2020   
+
+## Data Transformation
+
+![img](https://i.imgur.com/yXRdKRr.png)
+
+Most of the time we need to transform our raw data.It may be incorrect datatypes or special characters in data columns or it can be anything.
+So we will understand some basic data transformation which is must to move further and rest of them will be discussed later. 
+
+
+### to_datetime : convert str columns to datetime
+
+when we have date `time features` in our raw dataset, most of the time it is in string format and while keeping the column in 
+string we can not filter out new features of date and time so we need to transform the string into `datetime` objects.
+
+```python title=python highlight={3-4}
+df = pd.DataFrame({'datetime':['21/11/2020', '22/11/2020', '23/11/2020']})   # object
+
+pd.DataFrame(pd.to_datetime(df['datetime'], format="%d/%m/%Y"), columns=['datetime'])
+```
+![img](https://i.imgur.com/QsLmK5S.png)
+
+In highlight line we simply converted pandas series into dataframe by `pd.DataFrame()`.
+
+
+### astype : convert column datatype easily
+
+`astype()` convert any column into desired datatype easily .
+
+```python title=python highlight={3-4}
+df = pd.DataFrame({'id': ['1', '2', '3', '4', '5']})
+
+df['id'].astype('int64')
+
+```
+![img](https://i.imgur.com/Mp8ketn.png)
+
+In this example, I have created a dataset of string(object) datatype and then converted into `int64` by `astype()` function.
+it can be anything from `int64`  `float64`  `object`.
+
+### apply : perform any operation on df or column
+
+- `apply()` can be applied on single column as well as on entire dataframe.
+- pandas allows us to easily perform to whole column of dataframe `example : df.col + 1` which adds 1 to all the values in column,
+but sometime we have to do something unique that pandas doesn't support.In this case `apply()` function came into picture.
+- when we use apply function, it is very common to use `lambda` functions along with it.
+- In some special cases, the lambda function may not be enough. For example, we have a whole bunch of logic to apply to a column,
+which can only be put in a customised function. So, the apply() function can also be used along with customised functions.we just need to pass the 
+functions inside `apply(foo)`.
+
+```python title=On-Single-Column highlight={3-4}
+df = pd.DataFrame({'number': [1, 2, 3, 4, 5]})
+
+df.number.apply(lambda n: n+1)
+```
+
+```python title=On-Entire-DataFrame highlight={4-5}
+df = pd.DataFrame({'num1': [1, 2, 3, 4, 5],
+                   'num2': [5, 4, 3, 2, 1]})
+
+df.apply(lambda row: row['num1'] + row['num2'], axis=1)
+```
+
+```python title=Passing-Function-in-Apply highlight={4-5}
+def sum_cols(row):
+    return row['num1'] + row['num2']
+
+df.apply(sum_cols, axis=1)
+```
+
+### explode : convert each element of list into row
+
+I used to use this function when dealing with JSON documents. Because of the style of JSON, sometimes we have one key with an array value. In this case,
+ we can easily flatten the array.
+ 
+```python title=Custom-DataFrame
+df = pd.DataFrame([{
+    'name': 'Chris', 
+    'languages': ['Python', 'Java']
+},{
+    'name': 'Jade',
+    'languages': ['Java', 'Javascript']
+}])
+```
+![img](https://i.imgur.com/PaFVUEB.png)
+
+In this example, the languages that directly loaded from a JSON document are still arrays. Then, let’s use df.explode() function to flatten it out.
+
+```python title=python
+df.explode('languages')
+
+```
+![img](https://i.imgur.com/8Bj9II9.png)
+
+> Well, the Pandas library of Python has a lot more functions that makes it such a flexible and powerful data analytics tool in Python. In this post, I just organised the basic ones for data transformation that I believe are the most useful.
