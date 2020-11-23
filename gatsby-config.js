@@ -3,7 +3,7 @@ module.exports = {
     siteTitle: `FindingData`,
     defaultTitle: `FindingData`,
     siteTitleShort: `Sumit`,
-    siteDescription: `A personal and blogspot website for data Scientist`,
+    siteDescription: `A personal and blogspot website for learners in data Science field`,
     siteUrl: `https://www.findingdata.ml/`,
     siteImage: '/banner.png',
     siteAuthor: `@sumitkumar`,
@@ -31,6 +31,27 @@ module.exports = {
         display: `standalone`,
         icon: `static/favicon.png`,
       },
+    },
+    {
+      resolve: 'gatsby-transformer-remark',
+      options: {
+        plugins: [
+          {
+             resolve: 'gatsby-remark-mermaid',
+             options: {
+                 language: 'mermaid',
+                 theme: 'default',
+                 viewport: {
+                     width: 200,
+                     height: 200
+                 },
+                 mermaidOptions: {
+                     themeCSS: ".node rect { fill: cornflowerblue; }"
+                 }
+             }
+          }
+        ]
+      }
     },
     `gatsby-plugin-sitemap`,
     {
