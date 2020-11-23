@@ -1,7 +1,105 @@
 ---
 title: Important functions of pandas - Data Aggregation
-image01: ../images/pandas.png
+image: ../images/pandas.png
 imge01alt: Some important data aggregation functions in pandas
 description: Most important functions of python pandas you will use in your daily tasks while dealing with data like data manipulation, data cleaning, transformation and aggregation.
 ---
 23 Nov, 2020
+<br />
+
+Before reading this post, i would suggest you to read [Data Transformation](/notes/DS/important-functions-of-pandas-data-transformation/) first.
+
+
+## Data Aggregation
+
+![img](https://i.imgur.com/NN8rNCv.jpg)
+
+Data aggregation plays a very important role in data analytics. Pandas provides many ways to perform data aggregation. Here I orgranised some functions
+that you must know as basics.
+
+we will understand each function one by one...
+
+### concat : concatinate two dataframes
+
+- `concat()` function concatinates two different dataframes.
+- dataframes can be concatinated vertically as well as horizontally.
+- If you are not feeling well with `indexs` after concatinating dataframes, just recall `reset_index()` function.
+
+```python title=python highlight={7}
+df1 = pd.DataFrame({'id': [1, 2, 3],
+                   'name': ['Sumit', 'Aalit', 'Bob']})
+
+df2 = pd.DataFrame({'id': [4, 5],
+                    'name': ['AMan', 'Krish']})
+
+pd.concat([df1, df2])
+```
+![img](https://i.imgur.com/7knhnl8.png)
+
+### merge : merge two dataframes based on a column
+
+- `merge()` joins two tables like we do in SQL.
+- we need to specify which column that is used to join on with `on='id'` and specify how the two dataframes are joined.
+
+```python title=python highlight={7}
+df1 = pd.DataFrame({'id': [1, 2, 3],
+                   'name': ['Sumit', 'Aalit', 'Bob']})
+
+df2 = pd.DataFrame({'id': [1, 2, 3],
+                    'Sex': ['M', 'M', 'M']})
+
+pd.merge(df1, df2, on='id', how='inner')
+```
+![img](https://i.imgur.com/FDF3lk3.png)
+
+### groupby() AND groupby().agg()
+
+These two functions would be better demonstrated together, as the function df.groupby() cannot produce meaningful results by itself.
+It has to be used together with other functions that apply to the groups, which I believe df.groupby().agg() is the most common one.
+
+```python title=python highlight={6-7}
+df = pd.DataFrame({'id': [1, 2, 3, 4, 5],
+                   'name': ['Alice', 'Bob', 'Chris', 'David', 'Ella'],
+                   'language': ['Python', 'Java', 'Python', 'COBOL', 'Java'],
+                   'age': [21, 32, 31, 68, 29]})
+
+df.groupby('language').agg({'name': 'count', 'age': 'mean'})
+```
+![img](https://i.imgur.com/IaRC008.png)
+
+
+```python title=Use_groupby()_with_describe()_for_group_summary_statistics
+df.groupby('language').agg({'name': 'count', 'age': 'mean'}).describe()
+```
+![img](https://i.imgur.com/cNV2dtv.png)
+
+There are many aggregate functions to use :
+
+- [X] Frequency / Counts `size()` `count()`
+- [X] Central Tendency `mean()` `median()`
+- [X] Variance `std()` `var`
+- [X] `min()` `max()` `sum()` `prod()` `quantile()`         
+
+
+
+### pivot_table : groupby().agg() by pivot_table
+
+For the above example, we can also implement it using the pd.pivot_table() function. That is, we need to specify the group keys and the measure
+values as follows 
+
+```python title=python highlight={6-10}
+df = pd.DataFrame({'id': [1, 2, 3, 4, 5],
+                   'name': ['Alice', 'Bob', 'Chris', 'David', 'Ella'],
+                   'language': ['Python', 'Java', 'Python', 'COBOL', 'Java'],
+                   'age': [21, 32, 31, 68, 29]})
+
+pd.pivot_table(df, 
+               values=['name', 'age'], 
+               index=['language'], 
+               aggfunc={'name': 'count', 'age': ['min', 'max', 'mean']})
+```
+
+![img](https://i.imgur.com/0my3eRM.png)
+
+> Again, the Pandas library of Python has a lot more functions that makes it such a flexible and powerful data analytics tool in Python. In this post,
+ I just organised the basic ones for data Aggregation that I believe are the most useful.
