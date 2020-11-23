@@ -1,0 +1,132 @@
+---
+title: Important functions of pandas - Data Cleansing
+image01: ../images/pandas.png
+image01alt: Some important data cleansing functions in pandas
+description: Most important functions of python pandas you will use in your daily tasks while dealing with data like data manipulation, data cleaning, transformation and aggregation.
+---
+Nov 23, 2020
+
+## Data Cleansing
+
+Before reading this post, i would suggest you to read [Data Preview](/notes/DS/important-functions-of-pandas-data-preview/) first.
+
+We have covered about pandas,  pandas dataframe, pandas series and most common functions of data preview that pandas provides in out previous posts.
+
+![img](https://i.imgur.com/pkXMYXM.png)
+
+It is quite common that the raw dataset we got is not perfect. So always need to clean our dataset before use. Here are some related functions that pandas have 
+
+## We will work on same [dataset](https://www.kaggle.com/c/titanic/data?select=train.csv) 
+
+### isna : filter NULL values from the dataframe
+
+- `isna()` returns a series of boolean values representing whether the `Column record` is NULL or not.
+
+```
+df.isna()
+```
+![img](https://i.imgur.com/fL1KDCN.png)
+
+- `isna().sum()` returns sum count of Null values present in each column. So u can get a rought idea about how many values are Null.
+
+```
+df.isna().sum()
+```
+![img](https://i.imgur.com/Oeresp5.png)
+
+as we can see `Sex` column have 177 NuLL values. let's drop them 
+
+- We can drop all the rows having NULL values 
+
+```python title=python
+df=df[~df['Sex'].isna()]                        
+
+df.shape  # (714, 12)
+```
+![img](https://i.imgur.com/z2ayFhu.png)
+
+- `~` sign at the beginning reversed the boolean value, since we want to reserve the rows that NOT having NULL values. Finally, the data frame df
+will be filtered by this boolean series, where the row with “False” boolean value will be discarded.
+
+Remember our dataset shape was `891x12` and now it is `714x12`.
+
+### dropna : drop null values from entire dataset
+
+- if we want to drop null values from entire dataset. we can use dropna() function. 
+- `dropna()` filter all the rows having at least one null values. we can set the threshold for number of null values.
+- we can use `isna()` method but we will need to repeat  many  times for every column.
+- It is not a good idea to drop all the null values when there is a lot of null values according to our data.
+
+```python
+df = df.dropna()
+df.isna().sum()
+```
+![img](https://i.imgur.com/mqbLKli.png)
+
+### fillna : fill null values
+
+- `fillna()` fills the null values something that we will provide.
+- In this example, we will fill null values with `Missing` string.
+
+```
+df.fillna()
+``` 
+
+### drop_duplicates : drop duplicates rows
+
+- Sometimes the raw dataset may have some duplicated rows which we don't want.
+
+```python title=python highlight={6-7}
+df = pd.DataFrame({
+    "id":[1,2,3,4,5,6,7],
+    "Name":['sumit', 'lalit', 'bob', 'vineet', 'pankaj', 'mehek', 'sumit']
+})
+
+df.drop_duplicates()
+```
+
+![img](https://i.imgur.com/LDtVsQJ.png)
+In this example dataframe, `sumit` occurs two times so `drop_duplicates` will drop one `sumit`
+
+
+### drop : drop a list of columns
+
+- Suppose we want to some some columns that we dont want like `_Id` or the column that almost have all the null values, drop() will do it.
+- we can pass a list of multiple columns if we want to drop more than one column.
+- This function can be used to drop rows. 
+
+```python title=python highlight={6-7}
+df = pd.DataFrame({
+    "id":[1,2,3,4,5,6,7],
+    "Name":['sumit', 'lalit', 'bob', 'vineet', 'pankaj', 'mehek', 'sumit']
+})
+
+df.drop(columns=['id'], axis=1) # axis=1 : drop column wise
+
+```
+![img](https://i.imgur.com/V7TOE59.png)
+
+
+### rename : rename all the column names
+
+- `rename()` helped us to rename the columns headers.
+- Note : rename takes a dictionary as the parameter to map the columns.where keys are the old headers and values are the new headers.
+
+``` python title=python highlight={6-7}
+df = pd.DataFrame({
+    "id":[1,2,3,4,5,6,7],
+    "Name":['sumit', 'lalit', 'bob', 'vineet', 'pankaj', 'mehek', 'sumit']
+})
+
+df.rename(columns={'id':'_id', 'Name':'Full_Name'})
+```
+![img](https://i.imgur.com/L5XhwDC.png)
+
+### reset_index : reset indexes 
+
+When we drop some rows that having null values then indexes are also reseted because some rows were deleted in the middle. So to reset the indexes `reset_index` function is used.
+
+```mdx  
+df.reset_index()
+```
+> Indeed, the Pandas library of Python has a lot more functions that makes it such a flexible and powerful data analytics tool in Python. In this post, I just organised the basic ones for data cleansing that I believe are the most useful. 

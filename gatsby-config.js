@@ -5,7 +5,7 @@ module.exports = {
     siteTitleShort: `Sumit`,
     siteDescription: `A personal and blogspot website for data Scientist`,
     siteUrl: `https://www.findingdata.ml/`,
-    siteImage: '',
+    siteImage: '/banner.png',
     siteAuthor: `@sumitkumar`,
     siteLanguage: `en`,
     themeColor: `#8257E6`,
@@ -24,7 +24,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Rocketseat Gatsby Themes`,
+        name: `Findind Data`,
         short_name: `RS Gatsby Themes`,
         start_url: `/`,
         background_color: `#ffffff`,
