@@ -1,0 +1,73 @@
+---
+title: 'Measure of central tendency'
+description: A measure of central tendency is a summary statistic that represents the center point or typical value of a dataset.
+image: /images/statistics.png
+---
+Nov 29, 2020
+
+![img](https://i.imgur.com/rZYxPff.png)
+
+- A measure of central tendency is a summary statistic that represents the center point or typical value of a dataset.
+- In other words, it is a central location of a dataset.
+- the measure indicates where most values in a distribution falls.
+- the three most common central tendency are **mean** **median** **mode**.
+
+### Mean
+
+- Mean is average of all the data points also called as arthmetic mean.
+- To calculate mean, just add all the data points and divide by the count of numbers.
+
+![img](https://i.imgur.com/HXN3Fz4.png)
+
+
+```mdx title=Mean highlight={3-4}
+datapoints = [5,2,4,1,7,8,3]
+
+x(bar) = (5+2+4+1+7+8+3) / 7 = 4.28
+```
+
+### Median   
+
+- Median is a middle value in a sorted datapoints.
+- We prefer median when we have outliers or skewed data because median are less prone to outliers.
+- To calculate median, first - sort the datapoints in ascending ot descending order and pick the middle value.
+
+![img](https://i.imgur.com/pDXCIhY.jpg)
+
+
+```mdx title=Odd highlight={3-5}
+datapoints = [5,2,4,1,7,8,3]
+
+sorted = [1,2,3,(4),5,7,8]
+median = 4
+```
+
+```mdx title=Even highlight={3-5}
+datapoints = [20,10,35,25,50,40]
+
+sorted = [10,20,(25,35),40,50]
+median = (25+35)/2 = 30  
+```
+
+### Mode 
+
+- Mode is the value which occurs the most frequently in dataset.
+- In bar chart, Mode is the highest length bar.
+- If your data have multiple values that occuring frequrently, you have a multimodal distribution.
+- If no data repeats, then your data do not have a mode.
+
+```mdx title=Mode highlight={3-5}
+datapoints = [10,20,25,50,35,40,40,40,40]
+
+occurance of 40 is 4
+
+Mode = 40
+```
+
+![img](https://i.imgur.com/mhTmLjx.png)
+
+<br />
+<br />
+Next
+
+[Skewness and use of CT >](/notes/stats/skewness-with-use-of-central-tendency)
