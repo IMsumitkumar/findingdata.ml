@@ -1,0 +1,93 @@
+---
+title: 'PMF, PDF & CDF'
+description: A brief discussion on random variables, probability mass function, peobability density function, cumulative density function.
+image: ../images/statistics.png
+---
+
+Nov 29, 2020
+
+![img](https://i.imgur.com/2eBXz89.png)
+
+Before heading to probability density function or cumulative density function, we will understand about random variables because these density function
+works on different type of random variables
+
+## Random Variables
+
+- Random variables are the values which are depend upon the outcome of any experiment.
+- for example, while rolling a dice, we dont know what is the outcome (it may be any one from 1,2,3,4,5,6) so variable value depend upon the outcome of experiment.
+
+random variables are of two types:
+1. Continuous random variables
+2. Discrete random variable
+
+### Continuous random variables
+
+- The variables which having the values between a range or interval and we can grab infinite number of values from that interval.
+- for example : weight of 100 random people.
+
+### Discrete random values
+
+- The variables whose values are obtained by the counting.
+- for example : Number of student present in a class.
+
+## probability Mass Function (PMF)
+
+> probability density function is a statistical term that describes the probability distribution on Discrete random variables.
+
+
+## probability Density Function (PDF)
+
+> probability density function is a statistical term that describes the probability distribution of Continuous random variables.
+
+- If datapoints of given dataset follows gaussian distribution then Pdf will also follow probability density function.
+- On pdf, the probability of single outcome will always be zero because single point represent the line which doesn't cover any area under the curve.
+
+Mostly PDF follows Normal Distribution (Bell like Curve)
+
+![img](https://i.imgur.com/VpuPU9b.png)
+
+[Download Iris Dataset](https://www.kaggle.com/uciml/iris)
+
+```python title=PDF 
+counts, bin_edges = np.histogram(iris_data['PetalLengthCm'], bins=10, 
+                                 density = True)
+
+pdf = counts / sum(counts)
+```
+
+## Cumulative density function (CDF)
+
+As we know PDF describes probability distribution for Continuous random variables and PMF describes probability distribution for Discrete random variables.
+
+> Cumulative density function is a statistical term that describes the probability distribution for Continuous as well as Discrete ramdom variables.
+
+For example, if X is the height of a person selected at random then F(x) is the chance that the person will be shorter than x. If F(180 cm)=0.8. then there is
+an 80% chance that a person selected at random will be shorter than 180 cm (equivalently, a 20% chance that they will be taller than 180cm).
+
+```python title=CDF
+cdf = np.cumsum(pdf)
+```
+
+## Visuals 
+
+```python 
+counts, bin_edges = np.histogram(iris_data['PetalLengthCm'], bins=10, 
+                                 density = True)
+
+pdf = counts/(sum(counts))
+cdf = np.cumsum(pdf)
+
+plt.plot(bin_edges[1:],pdf)
+plt.plot(bin_edges[1:], cdf)
+plt.gca().legend(('Pdf','Cdf'))
+
+plt.title('PDF and CDF For iris_setosa')
+plt.xlabel("Petal length")
+plt.ylabel("Percentage")
+plt.show()
+```
+
+![img](https://i.imgur.com/B6VLsVK.png)
+
+<br />
+Next

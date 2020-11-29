@@ -1,0 +1,84 @@
+---
+title: 'Measures of Dispersion'
+description: Dispersion is way of describing how my data is spread around a average value
+image: ../images/statistics.png
+---
+Nov 29, 2020
+
+
+![img](https://i.imgur.com/toCHBr3.png)
+
+## Dispersion
+
+- Measure of Dispersion is a way of describing how data is spread around a average value.
+- If dataset have large differences between data values then dataset is said as widely scattered dataset.
+- If dataset have smmall differences between data value then we can say that dataset is tightly clustered dataset.
+
+## How is it useful ?
+
+- Measure of Dispersion represents the variation in the data which provide the information like how well the average of the sample represents the entire data.
+Less variation gives close representation while with larger variation average may not closely represent all the values in the sample.
+- Measures of dispersion enables us to compare two or more series with regard of their variations. It helps to determine consistency.
+
+
+### Range
+
+Range is the **difference between largest and lowest data point** in a given dataset.
+
+```mdx title=Range highlight={3-4}
+x = [1,5,23,89,2,12]
+
+Range = 89-1 = 88
+```
+
+### Mean Deviation
+
+**Average of absolute differences from the mean** is the mean Deviation.
+
+```
+step 1 : Calculate the mean for the given dataset.
+step 2 : Substract every datapoint with mean and add them all.(neglect -ve values)
+step 3 : divide the sum of all the differences with total number of datapoints.
+```
+
+![img](https://i.imgur.com/d7LY4T4.png)
+
+
+### Variance 
+
+- **The variance is the average of squared differences from the mean.**
+
+```
+step 1 : Calculate the mean.
+step 2 : find the difference of each datapoint from the mean and squared them.
+step 3 : divide the step 2 output with total number of data points (count). 
+```
+
+![img](https://i.imgur.com/wxjl1rG.png)
+
+
+### Standard deviation 
+
+- **Standard deviation is the squared root of variance**.
+- Standard deviation Measures how spread the values of dataset around the mean.
+ 
+deviation from mean.
+
+![img](https://i.imgur.com/OMg3So2.png)
+
+
+## Why do we divide by (n-1) instead of n ?
+
+- Read it carefully as it may be too long.
+- You have noticed that when we finding the Standard deviation or variance of sample, I am dividing `n-1` instead of n why? Because you don't
+know the true mean of populaion; all you know is the mean of sample.(Except fot the rare cases).Because of that i will not able to get the correct variances.
+To get the correct variances indirectly to decrease the error or to maintain the degree of freedom , divide by `n-1` rather than `n` .    
+- It is called [bessel correction](https://en.wikipedia.org/wiki/Bessel%27s_correction).
+ 
+<br/> 
+---
+
+<br/>
+Next
+
+ [Coefficient of Variance >](/notes/stats/coefficient-of-variances)

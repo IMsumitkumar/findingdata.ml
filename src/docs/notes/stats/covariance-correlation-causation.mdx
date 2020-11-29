@@ -1,0 +1,77 @@
+---
+title: 'Covariance, Correlation & Causation'
+description: A brief introdution on covariance correlation and causation, understand the difference of yor product.
+image: ../images/statistics.png
+---
+
+Nov 30, 2020
+
+![img](https://i.imgur.com/ojpBCKG.png)
+
+## Covariance 
+- covariance is a method to find out the variance between two variables.
+- To be more specific, covariance compares two variables in terms of the deviations from their mean (or expected) value.
+- It is a relationship between pair of random variables where change in one variables cause change in other variable.
+- It can take any value between -infinity to +infinity, where the negative value represents the negative relationship whereas a positive value represents the positive relationship.
+- It is used for the linear relationship between variables.
+- It has dimensions.
+
+Consider the random variables “X” and “Y”. Some realizations of these variables are shown in the figure below.
+
+### Positive covariance
+The orange dot show the mean of X and mean of Y. As the values of a get away from the mean of X in positive direction, the values of Y tend to change in similar way. Same relation is valid for negative direction as well.
+
+![img](https://i.imgur.com/ByRhvg0.png)
+
+The formula for covariance of two random variables:
+
+![img](https://i.imgur.com/7BNogwg.jpg)
+
+
+If X and Y change in the same direction, as in the figure above, covariance is positive. Let’s confirm with the covariance function of numpy:
+
+![img](https://i.imgur.com/AToQkVH.png)
+
+np.cov() returns the covariance matrix. The covariance of X and Y is 0.11. The value at position [0,0] shows the covariance of X with itself and the value at [1,1] shows the covariance of Y with itself. If you run the code np.cov(X,X), you will get the value at position [0,0] which is 0.07707877 in this case. Similarly, np.cov(Y,Y) will return the value at position [1,1].
+
+The covariance of a variable with itself is actually indicates the variance of that variable:
+
+```
+Covariance(X, X) = Variance(X)
+```
+
+### Negative covariance
+
+![img](https://i.imgur.com/IbmtsCd.png)
+
+### Covariance near to zero
+
+![img](https://i.imgur.com/luQ0zCA.png)
+
+
+
+## Correlation
+
+- It shows whether and how strongly pair of variables related to each other.
+- Correlation takes values between -1 to +1 and correlation near to +1 means highly correlated and vice versa.
+- It is a scaled version of covariance.
+- It is dimensionless.
+
+![img](https://i.imgur.com/XMAPB6C.png)
+
+### Negative, Positive , no correlation
+
+- Positive : When all the values of variables deviate in positive direction.
+- Negative : When all the values of variables deviate in Negative direction.
+- zero/no : when two variables are independent from each other.
+
+![img](https://i.imgur.com/ONEOZK4.png)
+
+## Causation
+
+![img](https://i.imgur.com/CYFaem2.png)
+
+<br />
+Next
+
+[PMF , PDF & CDF >](/notes/stats/probability-mass-function-probability-density-function-comulative-density-functions)
