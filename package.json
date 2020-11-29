@@ -26,8 +26,12 @@
   },
   "devDependencies": {},
   "keywords": [
-    "gatsby",
-    "sumit",
+    "data-science",
+    "statistics","central-tendency",
+    "machine-learning",
+    "skewness",
+    "kurtosis",
+    "findingdata.ml","findingdata",
     "gatsby-starter"
   ],
   "scripts": {
