@@ -1,0 +1,135 @@
+---
+title: 'Common Probability Distributions'
+description: Common Probability Distributions every data science professional should know.
+image: ../images/statistics.png
+---
+Nov 30, 2020
+
+![img](https://i.imgur.com/8jrA0Hb.png)
+
+There are two types of random variables which we have discussed in or previous post
+1. Continuous random variables
+2. Discrete random variables
+
+**Probability Distributions is a mathematical function that gives the Probabilities of occurance of different possible outcome for an experiement.**
+
+## Bernoulli Distribution
+
+Let's start with the first Distribution which is Bernoulli Distribution which is only difficult to pronounce nothing else!
+
+let's take a example of cricket :
+- At the begining of a cricket match,how will you dicide who is going to bat or ball ? A toss! yes. let say your team 
+choose head and head occurs on top what it means, your team win or the opposite situaton can be , your team lose the toss that means 
+you lose.There is no any midway, right?
+
+this is Bernoulli Distribution.there is no any midway. 
+
+- yes or no
+- 0 or 1
+- win or loss
+- success or failure
+
+
+```mdx title=formula
+if p is success -> (1-p) will be failure
+```
+
+![img](https://i.imgur.com/N8CrI4H.png)
+
+## Binomial Distribution
+
+
+- Let's take that cricket example again.Suppose that you won the toss today,  this indicates successful event and on the next day you again toss the coin 
+and you loss the toss which is failure.If you win a toss today that doesn't mean that you will win the toss tomorrow.
+
+- The Distribution where only two outcome are possible such as success and failure, win or loss and the Probability of success and failure is same for all the trails is called a Binomial Distribution.
+
+- Mean of Binomial distribution can be calculated by multiplying the number of trails by the Probability of success, (np).
+and Variance of Binomial Distribution is np(1-p).
+
+When p=0.5 that means distribution is symmetric about the mean.
+when p>0.5 that means distribution is skewed to the left.
+when p<0.5 that means distribution is skewed to the right.
+
+### Properties:
+
+- It involves a sequence of **n identical trails**
+- The trails are independent as the outcome of past event doesn't decide the outcome of the present event.
+- Only two outcomes are possible (Binary outcome).
+
+![img](https://i.imgur.com/xt2nodH.jpg)
+
+P(success) is not equal to P(failure)
+![img](https://i.imgur.com/9vsYxky.jpg)
+
+If Probability of success is equal to the Probability of failure than curve should be like normal distributed.
+
+## Poisson Distribution
+
+- If there is something which depend upon the time interval or period.
+- Poisson Distribution suited on the condition where event occurs on the random points or time or space.
+
+examples:
+
+1. let's say in last week, there was around 8 accidents on a highway, what is the Probability the i will get 10 accidents next day on the same highway.
+2. The number of thefts reported on an area on a day.
+3. The number of suicides reported in a perticular city.
+4. The number of customers arriving at a salon in next hour.
+
+### Properties
+
+- An successful event will not affect the outcome of another for another successful event.
+- The Probability of success of short interval must equal to the Probability oof success of another longer interval.
+- As the interval become smaller, the Probability of success approaches to zero.
+
+
+![img](https://i.imgur.com/ivhzBqL.png)
+
+```
+λ is the total number of events.
+x is number of event in that time interval.
+t is the length of time interval.
+```
+
+![img](https://i.imgur.com/5c2vAjj.gif)
+
+## Normal or Gaussian Distribution
+
+This distribution is very important and you will encounter this distribution in your entire preprocssing lifecycle.
+
+If a distribution follows the following characterstics than it must be a Normal distribution:
+
+- The mean, median, mode of the distribution coincide.
+- the total area under the curve is 1.
+- symmetric (50% data on the left hand side and 50% data on right hand side).
+- The curve of the curve will be bell shaped and symmetrical around the mean.
+
+
+![img](https://i.imgur.com/caddUCN.jpg)
+
+### standard normal distribution
+
+- SND is a subset of normal distribution.
+- The mean of standard normal distribution is 0.
+- standard deviation of standard normal distribution is 1.
+
+```
+µ = 0
+σ = 1
+```
+
+![img](https://i.imgur.com/2CYwBDh.png)
+
+
+```
+Normal distributed data ----> standard normal distributed data
+                          ↓
+              apply z statistics = [x-µ]/σ 
+```
+
+![img](https://i.imgur.com/XKgbykf.png)
+<br />
+Next
+
+[Estimation & Confidence of Interval >](/notes/stats/estimation-and-confidence-of-interval/)
+

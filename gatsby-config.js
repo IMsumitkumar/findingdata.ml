@@ -25,7 +25,7 @@ module.exports = {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `Findind Data`,
-        short_name: `RS Gatsby Themes`,
+        short_name: `Finding Data`,
         start_url: `/`,
         background_color: `#ffffff`,
         display: `standalone`,
