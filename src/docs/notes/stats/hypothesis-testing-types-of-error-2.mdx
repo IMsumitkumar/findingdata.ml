@@ -1,0 +1,107 @@
+---
+title: 'Type-I & Type-II Error'
+description: in this post, we will discuss about hypothesis and hypothesis testing with types of error and level of signnificance.
+image: ../images/hypothesis.png
+---
+
+Dec 02, 2020
+
+![img](https://i.imgur.com/SLMBJNm.png)
+
+
+### Type-I & Type-II Error
+
+| **Decision**  | **H0 True**  | **H0 False** |
+|---------------|--------------|--------------|
+| **Accept H0** |  TP          | FP (Type II) |
+| **Reject H0** |  FN (Type I) | FP           |
+
+
+- False positive (Type I Error) : Null hypothesis is true and still you are predicting it as false.(reject a true null hypothesis)
+- False Negative (Type II Error): Null hypothesis is false but stil you are predicting it as true. (Accept a false null hypothesis)
+
+Let's understand type I and Type II Error by an **Selmon Bhoi example**
+
+---
+<br />
+
+**Question :** Selmon Bhoi is arrested on the charge of being guilty or burglary.A jury of judges has to decide whether selmon bhoi is guilty or not?
+
+- H0 : Selmon Bhoi is innocent.
+- H1 : selmon bhoi is guilty.
+
+here positive refers to innocent and Negative refers to guilty.
+
+**Type I Error** = selmon bhoi was  innocent and still are predicting selmon bhoi as guilty. 
+
+**Type II Error** = Selmon bhoi is guilty and still jury is predicting selmon bhoi as innocent.(I think jury is thinking that selmon bhoi car was tesla and it must be self driving and deer may be died due to corona virus. Who knows, maaf kro!)
+
+### level of significance α
+
+- It is the probability of **type-I error**.
+- Level of significance is also the size of critical region.
+- denoted by α.
+
+```
+α = Prob[Type-I Error]
+β = Prob[Type-II Error]
+```
+
+### Steps involved in hypothesis testing:
+
+1. Setup the null hypothesis and the alternate hypothesis.
+2. Decide a level of significance i.e. alpha = 5% or 1%
+3. Choose the type of test you want to perform as per the sample data (z test, t test, chi squared etc.) (we will study all the tests in next section)
+4. Calculate the test statistics (z-score, t-score etc.) using the respective formula of test chosen
+5. Obtain the critical value for in the sampling distribution to construct the rejection region of size alpha using z-table, t-table, chi table etc.
+6. Compare the test statistics with the critical value and locate the position of the calculated test statistics i.e. is it in rejection region or non-rejection region.
+7. Two cases :
+
+I) If the critical value lies in the rejection region, we will reject the hypothesis i.e. sample data
+provides sufficient evidence against the null hypothesis and there is significant difference
+between hypothesized value and observed value of the parameter.
+
+II) If the critical value lies in the non- rejection region, we will not reject the hypothesis i.e.
+sample data does not provide sufficient evidence against the null hypothesis and the difference 
+between hypothesized value and observed value of the parameter is due to fluctuation of the
+sample.
+
+
+## P value
+
+Suppose you are performing hypothesis testing at a significance level of 1%.
+
+where H0:menan < X (assuming  scenario of 1 tail test)
+
+We obtain our critical value and find out the test statistical value which is greater than the critical value( based on the test you re performing ).so we have to reject the null
+hypothesis here as our value is lie inside the rejection region.
+
+What if level od=f significance is less than 1, would we have to reject the null hypothesis then also?
+
+Yes,  here p-value comes into play.
+
+**p-value is a smaller level of significance where null hypothesis can be rejected.**
+
+That’s why many tests now a days gives p-value and it is more preferred since it gives out more
+information than the critical value.
+
+```bash
+For right tailed test:
+p-value = P[Test statistics >= observed value of the test statistic]
+
+For left tailed test:
+p-value = P[Test statistics <= observed value of the test statistic]
+
+For two tailed test:
+p-value = 2 * P[Test statistics >= observed value of the test statistic|]
+```
+
+### Decision Making with p-value
+- If p-value is greater than level of significance, we do not reject the null hypothesis.
+- If p-value is smaller than level of significance, we reject the null hypothesis.
+
+
+<br />
+Next 
+
+[P-value, Z-test & t-test](/notes/stats/examples-on-p-value-z-test-t-test/)
