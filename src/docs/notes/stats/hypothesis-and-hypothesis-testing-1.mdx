@@ -1,0 +1,102 @@
+---
+title: 'Hypothesis & Hypothesis Testing - 1'
+description: Hypothesis, Hypothesis testing, critical region, two tailed test and one tailed test etc
+image: ../images/hypothesis.png
+---
+
+Dec 2, 2020
+
+![img](https://i.imgur.com/SLMBJNm.png)
+
+In our daily life, we often hear statements like a motor cycle company claiming that  certain model gives an average mileage of 100 km/liter. or 
+Dhoni is better than contemporaries and one funny statement what i believe from toothpaste or soap industry, claiming number 1 brand suggested by 
+dentist.
+
+Let's suppose, from the above statement let's take motorcycle company example, claiming that their certain model's average mileage is 100km/liter.
+So will you buy that model directly with correctness of their statement or will you confirm the claimed statement first? There must be parameter on which 
+one would judge the correctness of the statement and in this case, parameter is average mileage.
+
+**Hypothesis is a assumption, statement or a claim about the value of a parameter.**
+
+Dhoni is the best captain ever. This is an assumption based on the average team wins and loses, the team had in dhoni's captaincy.We can test that 
+hypothesis ( statement ) on all the previous match data. 
+
+- **Simple Hypothesis :** The hypothesis which specify exact value of parameter.
+- **Composite Hypothesis :** The hypothesis which specify a range of values.
+
+### Null Hypothesis
+
+- The hypothesis to be tested for possible rejection under the assumption that it is true.
+- Understand it by, you are innocent until you are proven guilty.
+- It is denoted by **H0**.
+
+### Alternate Hypothesis
+
+- Alternate Hypothesis is negation of Null hypothesis.
+
+
+```
+If Null hypothesis is -> Ho : A = B
+
+                              A ≠ B
+then altenate will be -> Ha : A > B 
+                              A < B
+```
+
+**Note :** Building null and alrenate hypothesis is depend upon various factors like problem statement, usecase, business understanding etc.
+
+
+## Hypothesis Testing
+
+Hypothesis testing is the statistical testing performing on the hypothesis to prove it or reject it.
+
+- When we test a hypothesis, we assume the null hypothesis is to be true until there is sufficient evidence in the sample to prove it false.In this case
+we will reject the null hypothesis and accept the Alternate hypothesis.
+
+**Note :** Well in stats, it is easier to disprove than to prove. how ? okay. Suppose there is a company who makes straws and that company claims that they are 95% confident that the diameter of every straw is 2 Now how will we prove their claimed statement.there can be two ways.
+One way is grab all the straws(population) and check one by one. Second is grab some sample of straws and try to find out that straw whose diameter is not equal to 2. Let say after 30 attempts you found a straw whose diameter is not equal 
+to 2 that means you disprove the claimed statement by checking only 30 straws rather than checking all the straws one by one.
+
+
+
+## Critical Region
+
+In the sample space, the region in which if the calculated values lies then we can reject null hypothesis.
+
+**Example :** Suppose you are going buy a bike. you have a list of all the bikes and thier cost and range of 
+bikes in the list is from 20000 to 100000 ruppes but you can spend only 30000 rupees that means you are not going reject the bikes having price range above than 30000.
+that means above 30000 to 100000 is the **Critical region** of your pocket.
+
+**Critical values** are values separating the values that support or reject the null hypothesis and are calculated on the basis of alpha.we will see how to choose α(level of significance).
+
+![img](https://i.imgur.com/XhELQPi.gif)
+
+`In the diagram, Rejection region is Critical Region.`
+
+Based on the alrenate hypothesis there are three types of Critical region arises:
+
+
+**Two tailed test**
+
+when Alternate hypothesis gives the Alternate in both the direction (Less than ot greater than) of the value of the parameter specified in Null hypothesis.
+
+```
+H0 : mean = 100
+H1 : mean ≠ 100 
+```
+
+- H0 is simple hypothesis as it is single valued.
+- H1 can be less than 100 or greater than 100 so it will be two tailed test case.
+
+
+**Left tailed test**
+
+When Alternate hypothesis gives the alternate in only left direction of the value of the parameter specified in Null Hypothesis.
+
+
+**Right tailed test**
+
+When Alternate hypothesis gives the alternate in only right direction of the value of the parameter specified in Null Hypothesis.
+
+
+![img](https://i.imgur.com/vPcSRjG.jpg)

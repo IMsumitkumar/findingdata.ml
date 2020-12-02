@@ -6,6 +6,10 @@ image: ../images/statistics.png
 
 Nov 30, 2020
 
+```
+Lot more to correct and lot more to add 
+```
+
 ![img](https://i.imgur.com/p8usCmm.png)
 
 
@@ -13,11 +17,19 @@ Nov 30, 2020
 
 - we can understand estimation from a simple project assignment example that is, Suppose i have assigned a work to you and asking you in how  many 
 time this project will be completed.then you should tell me like in 1-2 days i will complete this project or in 4-5 months i will complete.indirectly 
-you are giving me a range or a time of interval so you are estimating a range with a confidence. That confidence is nothing but a **confidence of interval**.
+you are giving me a range or a time of interval so you are estimating a range with a confidence.
+
+## Confidence of Interval
+
+Confidence Interval refers to the probability that a population parameter will fall between two set of values or interval.
+
+- **Confidence Interval** also indicates that the range that’s likely to contain the true population parameter, so the CI focuses on the population.
 
 - the interval estimate of a confidence interval is defined by **sample statistic ± margin of error**.
 
-- The probability part of a confidence of interval is called a **confidence level**.
+- The probability part of a confidence of interval is called a **confidence level (α)**.Here α lies between 0 and 1.
+
+    example : If we are 95% confident then **α** is 5%.
 
 - In a confidence interval, the range of values above and below the sample statistic is called the **margin of error**.
 
@@ -29,6 +41,13 @@ can build 100 as well but company didn't anayse the past data and didn't set an 
 
 - correct estimation is very much important.
 
+---
+Some important points:
+
+- The confidence level is not affected by margin of error.
+- The confidence interval is a type of interval estimate not a type of point estimate.
+- A sample mean is a example of point estimate not population mean.
+---
 
 ### Point estimation 
 
@@ -40,7 +59,10 @@ can build 100 as well but company didn't anayse the past data and didn't set an 
 - Gives a range depend upon the confidence.
 - In which estimation lie in a range between two values and can be anything between those two values.
 
+---
+<br />
 
+---
 
 
 ```
@@ -58,6 +80,19 @@ n = sample size
 here (1-α) is confidence interval and α is confidence level which will help us to find out the z-value from z-table.
 ```
 
+```
+for sample size n > 30
+
+Confidence interval = X ± (z * σ/√n) 
+where z critical value is derived from the z score table based on the confidence level.
+
+
+for sample size n < 30
+
+Confidence interval = X ± (t * s/√n)
+where t critical value is derived from the t score table based on the confidence level.
+
+```
 
 
 let say our eastimtion lie between 300 to 350 that means, with x% of confidence, we have to build at least 300 products.
@@ -66,4 +101,4 @@ let say our eastimtion lie between 300 to 350 that means, with x% of confidence,
 <br />
 Next 
 
-[Hypothesis >]()
+[Hypothesis & hypothesis testing >](/notes/stats/hypothesis-and-hypothesis-testing-1/)
