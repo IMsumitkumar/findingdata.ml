@@ -24,7 +24,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Findind Data`,
+        name: `Finding Data`,
         short_name: `Finding Data`,
         start_url: `/`,
         background_color: `#ffffff`,

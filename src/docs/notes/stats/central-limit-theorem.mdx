@@ -1,0 +1,54 @@
+---
+title: 'Central Limit Theorem'
+description: central limit theorem and its application with examples 
+image: ../images/statistics.png
+---
+
+Dec 03, 2020
+
+![img](https://i.imgur.com/4J3xzCF.png)
+
+central limit theorem is at the heart of hypothesis testing.Let's understand central limit theorem with some examples
+
+1. Let say, In a computer Science department of a university,  there are 10 sections divided for students and in each section, there are 
+100 students.so the population is 1000 students if i am not wrong.Our task is to calculate average height of students of computer Science department.
+i think the solution is simple what i will do, i will collect the height of each student and find the average.right?little time consuming but yes right.
+Now think, what if the data is humongous(very large)? Does this approach make sense.this will take too much time and efforts .So what can we do instead? 
+let's took an alternate approach
+
+- wee will note down height of 30 students(sample) from each section
+- calculate the individual mean of these samples.
+- calculate the mean of these sample means.(this value gives the approximate mean weight of the students).
+- probability of sample mean of students will resemble a bell shaped curve(Normal distribution).
+
+> Given a dataset from a unknown distribution(It can be uniform, binomial or may be completly random), the sample mean will approximate the normal distribution.
+
+![img](https://i.imgur.com/Us4AY7G.png)
+
+
+### Examples
+
+<iframe src="https://jovian.ai/embed?url=https://jovian.ai/imsumitkumar/untitled-baca9/v/2&cellId=0" title="Jovian Viewer" height="1400" width="800" frameborder="0" scrolling="auto"></iframe>
+
+### Assumptions behind CLT
+
+- Data must follow **randomized condition**.
+- samples should be independent to each other.(one sample should not influence the other sample).
+- Sample size should be sufficient large. How will we check?
+**sample size > 30 means sufficient** when population is symmetric.
+
+
+### statistical significance
+- Analyzing data involves statistical methods like hypothesis testing and constructing confidence intervals. These methods assume that the population is normally distributed. In the case of unknown or non-normal distributions, we treat the sampling distribution as normal according to the central limit theorem
+- If we increase the samples drawn from the population, the standard deviation of sample means will decrease. This helps us estimate the population mean much more accurately
+
+### Practical applications
+
+- Political/election polls are prime CLT applications. These polls estimate the percentage of people who support a particular candidate. You might have seen these results on news channels that come with confidence intervals. The central limit theorem helps calculate that
+- Confidence interval, an application of CLT, is used to calculate the mean family income for a particular region
+
+[Source Analytics Vidhya]()
+
+NEXT
+
+[A/B Testing >](/notes/stats/a-b-testing/)
