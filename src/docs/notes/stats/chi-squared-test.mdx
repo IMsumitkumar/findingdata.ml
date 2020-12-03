@@ -1,0 +1,70 @@
+---
+title: 'Chi Squared Test'
+description: Testing for hypothesis for population variance using chi squrared test.
+image: ../images/hypothesis.png
+---
+
+Dec 03, 2020
+
+![img](https://i.imgur.com/UuD6sJ0.png)
+
+## Testing for hypothesis for population variance using chi-squrared test
+
+
+- Defination wise, The chi-square test for variance is a non-parametric statistical procedure with a chi-square-distributed test statistic that is used for determining whether the variance of a variable obtained from a particular sample has the same size as the known population variance of the same variables. 
+---
+
+- Till now we are dealing with hypothesis testing for the mean of various samples, but when we have test the hypothesis based on the **variance**, we will be using Chi-Squared test.
+- **Example** let's we obtained certain sample variance which are different than the population variance, now we have to find out whether variance are within acceptable limit or it is varies more than the desired variance of the population.  
+
+![img](https://i.imgur.com/fU2Ophj.png)
+```mdx title=Notation
+n = sample size
+s = sample deviation
+σ = standard deviation
+degree of freedom = n-1
+```
+
+> As similar with other tests, the critical value is obtained through a chi table on the basis of degree of
+freedom and significance level.
+
+### Example
+<iframe src="https://jovian.ai/embed?url=https://jovian.ai/imsumitkumar/hypothesis-testing-examples/v/3&cellId=2" title="Jovian Viewer" height="490" width="800" frameborder="0" scrolling="auto"></iframe>
+
+## Chi-Squared for Categorical Variables
+
+Chi-Squared test is widely used to estimate 
+- How closely distribution of a Categorical variable matches the expected distribution **(Goodness of the fit test)**.
+- whether two variables are dependent of one another **(the test of independence)**.
+
+Suppose that a particular value Z1 is randomly selected from a standardized normal distribution. Then
+suppose another value Z2 is selected from the same standardized normal distribution. If there are d
+degrees of freedom, then let this process continue until d different Z values are selected from this
+distribution. The χ2 variable is defined as the sum of the squares of these Z values
+
+χ2 = Z₁^2 + Z₂^2+ ----- + Zd^2
+
+> This sum of squares of n normally distributed variables has a distribution which is called
+theχ2distribution with d degrees of freedom.
+
+
+### Chi-Squared test for Goodness of fit
+
+- Chi Square test for testing goodness of fit is used to decide whether there is any difference between the
+observed (experimental) value and the expected (theoretical) value.
+- A goodness of fit test is a test that is concerned with the distribution of one categorical variable.
+- The null and alternative hypotheses reflect this focus:
+```
+H0: The population distribution of the variable is the same as the proposed distribution
+HA: The distributions are different
+```
+The chi-square statistic is calculated as:
+
+![img](https://i.imgur.com/CI6v3CY.png)
+
+```mdx title=Notation
+Observed = Actual count values in each category
+Expected = the predicted (expected) counts in each category if the null hypothesis were true.
+```
+### Example
+<iframe src="https://jovian.ai/embed?url=https://jovian.ai/imsumitkumar/hypothesis-testing-examples/v/3&cellId=4" title="Jovian Viewer" height="662" width="800" frameborder="0" scrolling="auto"></iframe>
