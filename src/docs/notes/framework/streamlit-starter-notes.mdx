@@ -259,5 +259,23 @@ st.map(filtered_data)
 
 
 
+### seaborn : scatterplot
+```python 
+st.subheader('Seaborn scatterplot of Median Family Income by Percent Unemployed')
+plt.figure()
+sns.set_style('darkgrid')
+plt.title('Median Family Income versus Unemployment')
+sns.scatterplot(x='Median Family Income',y='Percent Unemployed',data=df,hue='Income Quartile',palette="Dark2")
+st.pyplot()
+```
 
 
+```python
+# Histogram for median family income
+st.subheader('Seaborn distplot of Median Family Income')
+plt.figure()
+plt.title('County Level Income Distribution')
+sns.set_style('darkgrid')
+sns.distplot(df['Median Family Income'])
+st.pyplot()
+```
