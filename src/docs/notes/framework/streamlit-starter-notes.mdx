@@ -235,13 +235,13 @@ st.bar_chart(hist_values)
 ```
 
 ### Plot data on a map
-```Python   
+```python   
 st.subheader('Map of all picks')
 st.map(data)
 ```
 
 ### Explore Dynamically
-```Python
+```python
 hour_to_filter = 17
 filter_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
 st.subheader(f'Map of all the pickups at {hour_to_filter}:00')
@@ -249,7 +249,7 @@ st.map(filter_data)
 ```
 
 ### Slider
-```Python
+```python
 hour_to_filter = st.slider('hour', 0, 23, 17)
 filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
 
