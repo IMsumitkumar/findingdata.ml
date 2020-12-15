@@ -41,6 +41,9 @@
 
     - label: 'Deployment'
       link: '/notes/deploy/all-deploy'
+    
+    - label: 'Streamlit'
+      link: '/notes/framework/streamlit-starter-notes'
       
 - label: Community
   items:

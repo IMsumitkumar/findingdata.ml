@@ -1,0 +1,263 @@
+---
+title: 'Streamlit Cheat Notes'
+description: basic streamlit starter notes to access them quickly 
+image: ../images/streamlit.jpg
+---
+
+Dec 16, 2020
+
+![img](https://i.imgur.com/gYjAQ0n.png)
+
+
+
+- Streamlit apps are Python scripts that run from top to bottom
+- Every time a user opens a browser tab pointing to your app, the script is re-executed
+- As the script executes, Streamlit draws its output live in a browser
+- Scripts use the Streamlit cache to avoid recomputing expensive functions, so updates happen very fast
+- Every time a user interacts with a widget, your script is re-executed and the output value of that widget is set to the new value during that run.
+
+
+### Installation
+
+```python
+pip install streamlit
+streamlit hello
+```
+
+```python title='running a streamlit app'
+streamlit run app.py
+```
+### Importing the modules
+```python
+import streamlit as st
+import numpy as np 
+import pandas as pd 
+```
+
+### title
+```python
+st.title('My first app')
+
+st.write("Here's our first attempt at using data to create a table:")
+```
+
+### data
+```python
+data = pd.DataFrame({'first column': [1, 2, 3, 4],
+                     'second column': [10, 20, 30, 40]
+                    })
+
+# display data table in web app
+# st.write(data)
+data # magic command to show the dataframe table in web app
+```
+
+
+### line chart
+```python
+chart_data = pd.DataFrame(
+     np.random.randn(20, 3),
+     columns=['a', 'b', 'c'])
+
+st.line_chart(chart_data)
+```
+
+### plot map chart
+```python 
+map_data = pd.DataFrame(
+    np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
+    columns=['lat', 'lon'])
+
+st.map(map_data)
+```
+
+
+### show data if checkbox is checked
+```python
+if st.checkbox('Show dataframe'):
+    chart_data = pd.DataFrame(
+       np.random.randn(20, 3),
+       columns=['a', 'b', 'c'])
+
+    chart_data
+    # st.line_chart(chart_data)
+```
+
+### use selectbox to select from a series
+```python
+option = st.selectbox(
+    'Which number do you like best?',
+     data['first column'])
+
+'You selected: ', option
+```
+
+
+### layout : sidebar
+```python
+option = st.sidebar.selectbox(
+    'Which number do you like best?',
+     chart_data['a'])
+
+'You selected:', option
+
+# most of the elements can be putted into sidebar usinf .sidebar
+# st.sidebar.map(map_data)
+```
+
+
+### Divider : two column or more
+```python
+left_column, right_column = st.beta_columns(2)
+```
+
+### action on button press
+```python
+pressed = left_column.button('Press me?')
+if pressed:
+    right_column.write("Woohoo!")
+```
+
+
+### expand content : explain long content
+```python
+expander = st.beta_expander("FAQ")
+expander.write("Here you could put in some really, really long explanations...")
+```
+
+
+
+
+### Show Progess bar
+```python
+import time
+
+'Starting a long computation...'
+
+# Add a placeholder
+latest_iteration = st.empty()
+bar = st.progress(0)
+
+for i in range(40):
+  # Update the progress bar with each iteration.
+  latest_iteration.text(f'Iteration {i+1}')
+  bar.progress(i + 1)
+  time.sleep(0.1)
+
+'...and now we\'re done!'
+```
+
+# uber Pickups
+
+![img](https://i.imgur.com/k7t6dNp.png)
+
+```python
+import streamlit as st  
+import pandas as pd
+import numpy as np
+```
+
+### change icon and title
+```python
+from PIL import Image
+#img = Image.open("file_name.png")
+# pass that variable as page_icon value to use custom icon or logo
+
+# another way
+PAGE_CONFIG = {"page_title":"Jesse", "page_icon":":smiley:", "layout":"centered"}
+st.set_page_config(**PAGE_CONFIG)
+
+# OR
+
+st.set_page_config(page_title='Sumit', page_icon=':smiley:')
+```
+
+### adding title of page
+```python
+st.title("Uber Pickups in NYC")
+```
+
+### fetching the data
+```python
+DATE_COLUMN = 'date/time'
+DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
+            'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+```
+
+### Loading and Caching
+```python
+# function to download raw data and convert text datatype into datetime
+@st.cache
+def load_data(nrows):
+    data = pd.read_csv(DATA_URL, nrows=nrows)
+    lowercase = lambda x: str(x).lower()
+    data.rename(lowercase, axis='columns', inplace=True)
+    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+
+    return data
+```
+### usage of st.cache
+
+-  In computer science terms, what is happening here is that @st.cache is memoizing.
+- using st.cache, browser don't need to download the dataset evetytime you refresh the page to save the time
+- indirectly, store the results into local cache, and return the result from local cache after checking the variable name, input parameters, actual bytecode
+
+
+1. @st.cache  (Basic)
+2. @St.cache(suppress_st_warning=True) 
+
+    - (When the function arguments change)
+    - (When the function body changes)
+    - (When an inner function changes)
+    - (Use caching to speed up your app across users)
+    - Example : a, b, a*b
+
+
+### Loading using caching
+```python
+data_load_state = st.text('Loading data ...')
+data = load_data(10000)
+data_load_state.text('Dataset loaded using Streamlit caching!')
+```
+
+### Showing the dataset with a subheader
+```python
+if st.checkbox('Show raw data'):
+    st.subheader('Raw Data')
+    st.write(data)
+```
+
+### plot bar chart 
+```python
+st.subheader('Number of picks by hour')
+hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0, 24))[0]
+st.bar_chart(hist_values)
+```
+
+### Plot data on a map
+```Python   
+st.subheader('Map of all picks')
+st.map(data)
+```
+
+### Explore Dynamically
+```Python
+hour_to_filter = 17
+filter_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
+st.subheader(f'Map of all the pickups at {hour_to_filter}:00')
+st.map(filter_data)
+```
+
+### Slider
+```Python
+hour_to_filter = st.slider('hour', 0, 23, 17)
+filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
+
+st.subheader('Map of all pickups at %s:00' % hour_to_filter)
+st.map(filtered_data)
+```
+
+
+
+
+
