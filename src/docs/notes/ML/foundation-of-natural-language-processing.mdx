@@ -1,0 +1,338 @@
+---
+title: "Foundation of natural language processing"
+description: we will see the foundation of natural language processing and will learn briefly, how to convert text into vectors.
+---
+
+![img](https://i.imgur.com/lskyAHC.png)
+
+
+In real world, there is a lot of text data like we communicate on community forums or daily news or product reviews(good bad neutral etc) of a spefic product etc there are lot of sources of text data.
+but when we talk about machine learning, machine can understand only numerical data.so target is to convert text data into numerical data so that we can get the superpowers of mathematics and linear
+algebra to find out useful insights and making state of the art models. And fortunately in present time, we can convert text into numerical data to very eficiently and without doing any much efforts.
+so in this post, we will learn **various algorithms to convert text into vectors**.
+
+### So, why convert text into vectors?
+As i mentioned in the above paragraph, converting text into vectors will give us the power of linear algebra to find out the patterns and seperating by using planes and hyperplanes(for example).
+
+### let's understand 
+
+just imagine for sometime, we have  scrapped some reviews(positive reviews , negative reviews) of some product from e-commerce website and we have created n-dimentional vector of review_1 and n-dimentional
+vector for review_2 and so on.we have plotted those vectors into d-dimentional representation of vectors into n-dimentional space.positive review vectors clustered together and negative also. we have drawn 
+a hyperplane between them and we have made a condition like vector points normal to the plane are positive and vector points not normal to the plane are negative points.
+If you can find the normal of plane than this problem can be solved.
+
+> Image
+
+we have solved a text data problem with some mathematics and linear algebra. COOL Nah!
+
+**Now consider that representation of vectors in n- dimentional space, positive reviews vectors are clustered together and negative reviews vectors too.let's pick up three reviews vectors from it (one from**
+**negative and 2 from positive)-> (r1, r2, r3) if you see the representation closely, positive reviews are similiar to eacher other results a closer to each other and r1 and r3 (r1 is positive and r3 is negative) results farther from each other because english meaning is not same.**
+```
+r1 = positive review -> v1 vector
+r2 = positive review -> v2 vector
+r3 = negative review -> v3 vector
+
+English_similiarity(r1, r2) > English_similiarity(r1, r3)
+
+results |
+
+Distance(v1, v2) < Distance(v1, v3)
+```
+
+> So aim is convert text to vectors such that similiar text must be closer to each other geomatriclly.
+there are lot of techniques but we will cover only followig in this post :
+- Bag of words (BoW)
+- Uni-Gram/Bi-Gram/N-Gram
+- Term frequency - inverse document frequency (Tf-IDF)
+- Word2Vec
+- Avg-Word2Vec
+- Tf-IDF Word2Vec
+
+
+
+## Bag of words (BoW)
+
+let's understand some terma related to text data. we will take the same reviews example
+
+- **Set of all the reviews is document.**
+
+```
+r1: This pasta is very tasty and pasta is affordable.
+r2: This pasta is not tasty and affordable.
+r3: This pasta is affordable and cheap.
+r4: Pasta is tasty and pasta tastes good.
+```
+**steps**
+
+> constructting a set
+
+- set of all the unique words in the document
+```
+{'This', 'pasta', 'is',........,'good'}
+```
+
+let say there are d unique words, and d may be very large if you have a lot of reviews in document.
+
+> constructting vector for every review based on the set
+
+- Fill up the above set by occurance of word for every review.
+- If word in not present in review than fill up the cell with 0.
+- Each word is a different dimension.
+- every vector will be of d dimentional vector.
+- vectors will bw  very sparse (most of elements of vectors are zero).
+
+```mdx title=somethng-like-this
+r1: This pasta is very tasty and affordable.
+s : {'This', 'pasta', 'is', 'cheap',........'affordable', 'good'}
+v1:[1, 2, 1, 0, ......, 1, 0]
+
+```
+### Variations of bag of word
+- Binary/boolean bag of word
+
+> Instead storing occurance of words for a particular review, we store only presence by 0(if not present) or 1(if word is present in review).
+
+
+```
+let's say
+
+v1= [1,1,1,1,1,0,3,1,2]
+v2= [1,2,1,1,1,1,2,1,2]
+
+length(v1, v2) = || v1 - v2 || = sqrt((-1)**2+(-1)**2+(1)**2)
+```
+
+
+### Drawbacks of bag of words
+
+-  Dimentionn is too huge if we have lot of text.
+-  vector would also contain a lot of zeros, means sparse vectors resulting sparse matrix.
+- The major drawback is not considering the sementic meaning of words (like tasty and delicious are same is english meaning(synonyms)).
+- It doesn't work well when we have a small changes in same type of text reviews. like 
+```
+ex: negation of a review.
+```
+
+### Code 
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+count_vect = CountVectorizer()
+final_counts = count_vect.fit_transform(preprocessed_data)
+print(type(final_counts))
+```
+`<class 'scipy.sparse.csr.csr_matrix'>`
+
+## Text-Preprocessing
+
+### Improving bag of words
+- elimination of thw words which contain no meaning i.e, this, a, an etc (removing stop words)
+- Kepp only relevent and importnt words.
+- target: vector should be smaller and meaningful.
+```
+removing stopwords not always a good idea 
+
+cosider these reviews:
+
+r1: This pasta is very tasty and pasta is affordable.
+r2: This pasta is not tasty and affordable.
+
+both are different in meaning and 
+
+if i remove 'not' with other stopwords what will i have?
+i have 
+[pasta, tasty, affordable]
+
+
+:(
+```
+
+> So eleminate **stop words** very carefully.
+
+### convert into lower cases
+
+pasta and Pasta are same for us but not for machines so second step should be convertig the text into lower cases.
+
+### Stemming
+
+Finding the root word or base word for the similiar type of word.
+
+```
+consider ['tasty', 'tasteful', 'tastes'] 
+three of them conveying a same meaning to us (humans) but not to machines.
+
+root of of all these similiar type of word should be `tasty`.
+
+```
+
+we can use nltk for this
+- PorterStemmer
+- SnowballStemmer
+
+> PorterStemmer is better than SnowballStemmer.
+
+### lemmetization
+
+> **Breaking up the sentence into word.**
+
+Challenges with lemmetization
+- language dependent 
+- context dependent
+
+
+```
+sentence: "This pasts is very tasty and this pasta is the best in NewYork"
+
+lemmetized : ['This', 'pasta' 'is', 'very', 'tasty', 'and', 'this', 'pasta','is', 'best', 'in', 'New', 'York']
+
+```
+take care while lemmetizing sentence for **boundary cases**. Like in above example NewYork is divided in New and York which is completely conveying a different meaning
+which should not be.
+
+
+> But Text Preprocessing do not solve **semantic meaning of words** problem. we will see how can we solve this to get better results.
+
+
+## Uni-Gram/Bi-Gram/N-Gram
+
+```
+removing stopwords not always a good idea 
+
+cosider these reviews:
+
+r1: This pasta is very tasty and pasta is affordable.
+r2: This pasta is not tasty and affordable.
+
+both are different in meaning and 
+
+if i remove 'not' with other stopwords what will i have?
+i have 
+[pasta, tasty, affordable]
+
+
+:(
+```
+
+Cosider the above example.Removing stop words can be dangerous sometime. So how can we overcome this problem? by using **N-Grams**
+
+
+### Uni-Gram
+- consideing only one word at a time.
+- In other words, Each word considered as a dimention.
+- If you compare this with bag of words, it is nothing but a uni-gram based BoW.
+```
+review: "this pasta is not tasty and affordable"
+
+uni-gram = ['This', 'pasta', 'is', 'not', 'tasty', 'and', 'affordable']
+```
+
+### Bi-Gram
+- consider pair of consecutive words as a dimention.
+```
+review: "this pasta is not tasty and affordable"
+
+uni-gram = ['This pasta', 'pasta is', 'is not', 'not tasty', 'tasty and ', 'and affordable']
+```
+
+### tri-Gram
+- consider three words as dimention.
+
+```
+review: "this pasta is not tasty and affordable"
+
+uni-gram = ['This pasta is', 'pasta is not', 'is not tasty', 'not tasty and', 'tasty and affordable']
+```
+
+### N-Gram
+- Finally, here is simplest model that assigns probabilities to sentences and sequences of words, the n-gram
+
+### Advantages
+- Unigram based BoW : completely discard the sequencial information.
+- Bi-Gram/tri-gram/N-Gram : Retain some sequencial information.
+
+### Disadvantages
+- When N increases, Dimension will also be increasing drastically.
+
+### Code 
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+count_vect = CountVectorizer(ngram_range=(1,2), min_df=10, max_features=10000)
+final_counts = count_vect.fit_transform(preprocessed_data)
+print("shape of vector space:",final_counts.get_shape())
+```
+`shape of vector space: (393591, 10000)`
+
+## Tf-IDF
+> Term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus.
+
+### Term Frequency (TF)
+
+term frequency is the ratio of the number of a particular word in a particular review divided by total number of words in that review.
+
+```
+TF = n/N
+
+n : Number of word (w) in a review(r)
+N : total number of words in review(r)
+
+```
+It is nothing but how many times a word occur in a review.It means it is probability and probability always between 0 and 1.
+
+```
+
+0<=TF(w, r)<=1
+
+```
+
+### Inverse Document Frequency (IDF)
+
+IDF is the logirthm of the ratio of the total number of document or reviews divided by the number of document which contains the word.
+
+```
+
+IDF = log(N/n)
+
+
+N : Total number of document or reviews
+n : Number of documents which contain the word.  
+
+```
+
+-  logirthm is a monotonic function.
+- increasing number of document contain a single words results lower value of idf of that perticular word.
+- By using log we are just limiting the heavy occurances of words.using log in idf is based on ziff's law, this explanation is not full scientific.
+
+> consider 'The' which occurs a lot in most of the sentence (i think) and which contain no meaning. So it's idf value will be very low which is relevent according to the formula.
+
+### Tf-IDF 
+
+```
+TF-IDF = TF * IDF
+
+TF : term frequency
+IDF : Inverse Document frequency    
+```
+
+### Advantages
+
+- Giving more importance to a rarier word in document corpus.
+
+### Disadvantages
+
+- It doesn't deal with semantic meaning of words. :(
+
+### Code
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tf_idf_vect = TfidfVectorizer(ngram_range=(1,2), min_df=10)
+final_counts = tf_idf_vect.fit_transform(preprocessed_data)
+print("(unique words in the corpus)",tf_idf_vect.get_feature_names()[0:10])
+print("shape of vector space:", final_counts.get_shape())
+```
+
+## Word2Vec
+
+> I will cover it later.
+
