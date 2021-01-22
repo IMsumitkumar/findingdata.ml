@@ -1,0 +1,1399 @@
+---
+title: House Prices; Everything you need 🏘️💰
+description: end to end implementation of regression problem with EDA, model building and hyperparameter tunning.
+image: ../images/regression.jpg
+---
+
+> Advice : If you are using laptop or desktop, Divide the browser window into half of the screen.
+## Introduction
+
+Hello, readers! Understanding data is one of the most important steps in any Machine Learning process. Exploratory Data Analysis (EDA) does exacly that!
+
+In this Post, we will explore the [dataset for the Housing Prices](https://www.kaggle.com/c/house-prices-advanced-regression-techniques/data) Competition on Kaggle. The dataset, compiled by Dean De Cock, contains information about (almost) every aspect of residential homes in Ames, Iowa. The aim of our analysis is to:
+
+- Understand which features are important in determining price, and
+- Form a strategy for processing our data before feeding them to a Machine Learning algorithm.
+
+Processing the data and building Machine Learning models will be the topic of another notebook. Here, we will only study EDA. I have included text to explain my reasoning/workflow and make this kernel as beginner friendly as possible. I have only assumed you are familiar with different visualization techniques (e.g. boxplots) and key statistical concepts (e.g. normal distribution etc).
+
+![img](https://i.imgur.com/wT836b6.jpg)
+
+## Libraries
+
+We start by importing the necessary libraries and setting some parameters for the whole notebook (such as parameters for the plots, etc.). We will mainly use:
+- Pandas for handling and analysing data, and
+- Seaborn and Matplotlib for data visualization.
+
+```python
+import warnings
+warnings.filterwarnings('ignore')
+
+import numpy as np
+import pandas as pd
+pd.set_option('precision', 3)
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+%config InlineBackend.figure_format = 'retina'
+
+import seaborn as sns
+sns.set_style('darkgrid')
+
+mpl.rcParams['axes.labelsize'] = 14
+mpl.rcParams['axes.titlesize'] = 15
+mpl.rcParams['xtick.labelsize'] = 12
+mpl.rcParams['ytick.labelsize'] = 12
+mpl.rcParams['legend.fontsize'] = 12
+
+from scipy import stats
+from scipy.stats import norm, skew 
+from scipy.special import boxcox1p
+import xgboost as xgb
+import lightgbm as lgb
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+from sklearn.model_selection import (cross_val_score, GridSearchCV,
+                                     learning_curve, KFold, train_test_split)
+from mlxtend.regressor import StackingCVRegressor
+from sklearn.linear_model import ElasticNet, Lasso,  BayesianRidge, LassoLarsIC
+from sklearn.ensemble import RandomForestRegressor,  GradientBoostingRegressor
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import RobustScaler
+from sklearn.metrics import mean_squared_error
+
+random_state = 42
+
+print ('Libraries Loaded!')
+```
+```
+Libraries Loaded!
+```
+
+## Getting the Data
+The data has already been split into a training set ('train.csv') and a test set ('test.csv'). We can use the read_csv() method to load them as Pandas dataframes:
+
+```python 
+train_df = pd.read_csv('train.csv')
+test_df = pd.read_csv('test.csv')
+
+print ('Dataframes loaded successfully!\n')
+print ('The train set contains {} rows and {} columns'.format(train_df.shape[0], train_df.shape[1]))
+print ('The test set contains {} rows and {} columns'.format(test_df.shape[0], test_df.shape[1]))
+```
+
+```
+Dataframes loaded successfully!
+
+The train set contains 1460 rows and 81 columns
+The test set contains 1459 rows and 80 columns
+```
+
+```python
+common_cols = train_df.columns & test_df.columns
+print ("Column not in common: '{}'".format(np.setdiff1d(train_df.columns, common_cols)[0]))
+```
+```
+Column not in common: 'SalePrice'
+```
+
+The difference in the number of columns/attributes is due to the fact that the training set is labeled, i.e. it contains a column for the price of each house.
+This set should be used to build our machine learning models, while the test set should be used to see how well our model performs on unseen/unlabeled data.
+
+## A Quick Look at our Data
+The aim of this section is to familiarize ourselves with the data. We will focus entirely on the training set and forget about the test set completely (which ensures we won't add data snooping bias).
+
+Firstly, we can take a quick glance at the top five rows of the training set using the head() method:
+
+```python
+train_df.head()
+```
+> image
+
+It would be really tedious to go through the meaning of each column individually. If you want to know more, please read the [data_description.txt](https://www.kaggle.com/c/home-data-for-ml-course/data?select=data_description.txt)
+
+We can drop 'Id' since it is unique to each instance/observation and doesn't provide any useful information
+
+```python
+train_df.drop(['Id'], axis = 1, inplace = True)
+print ("'Id' dropped!")
+```
+```
+'Id' dropped!
+```
+
+## Missing Values
+Notice that some columns contain missing values ('NaN' i.e. 'Not a Number'). We can see both the count and the percentage of missing values for each column:
+
+```python
+missing_counts = train_df.isnull().sum().sort_values(ascending = False)
+missing_percent = (train_df.isnull().sum()*100/train_df.shape[0]).sort_values(ascending = False)
+
+missing_df = pd.concat([missing_counts, missing_percent], axis = 1, keys = ['Counts', '%'])
+
+display(missing_df.head(20).style.background_gradient(cmap = 'Reds', axis = 0))
+```
+
+```
+
+------------Counts----%
+PoolQC	     1453	99.521
+MiscFeature	 1406	96.301
+Alley	     1369	93.767
+Fence	     1179	80.753
+FireplaceQu	 690	47.260
+LotFrontage	 259	17.740
+GarageType	 81	    5.548
+GarageCond	 81	    5.548
+GarageFinish 81	    5.548
+GarageQual	 81	    5.548
+GarageYrBlt	 81	    5.548
+BsmtFinType2 38	    2.603
+BsmtExposure 38	    2.603
+BsmtQual	 37	    2.534
+BsmtCond	 37	    2.534
+BsmtFinType1 37	    2.534
+MasVnrArea	 8	    0.548
+MasVnrType	 8	    0.548
+Electrical	 1	    0.068
+RoofMatl	 0	    0.000
+```
+
+19 attributes contain missing values. Our first instinct would be to discard the first five attributes ('PoolQC' to 'FireplaceQu') since more than 40% is missing. However, if we take a closer look at the description, a NaN value in these columns indicates the absence of what is been described. As an example, NaN in 'PoolQC' simply means that there is no pool.
+
+Therefore, we should not remove these values when building our models but instead construct a strategy for imputation. For more details, take a look at my other kernel (which will be out soon!)
+
+## Data Types
+There are two types of variables:
+1. **Numeric** variables that can be expressed on a numeric scale. There are two basic categories of numeric variables:
+- **Continuous**: can take any value within a range/interval (e.g. a person's height), and
+- **Discrete**: can only take certain integer values (e.g. the number of students in a class).
+
+2. **Categorical** variables that can take only a fixed set of values that correspond to a set of possible categories (e.g. gender, country names, etc.). Special cases of categorical variables are:
+- **Binary**: only two categories exist (e.g. male/female, 1/0, etc.), and
+- **Ordinal**: the categories have an order associated with them (e.g. low/medium/high). The opposite of ordinal are nominal categories.
+
+Different visualization techniques apply to each type, so it's useful to isolate numeric and categorical attributes as separate dataframes:
+
+```python
+numeric_atts = train_df.select_dtypes(exclude = ['object'])
+cat_atts = train_df.select_dtypes(include = ['object'])
+
+print ('Number of Numeric columns: ', len(numeric_atts.columns))
+print ('Number of Categorical columns: ', len(cat_atts.columns))
+```
+```
+Number of Numeric columns:  37
+Number of Categorical columns:  43
+```
+
+## Exploratory Data Analysis
+
+### Numeric Data
+By calling the hist() method we can plot a histogram for each numeric attribute:
+
+```python
+numeric_atts.hist(figsize = (12, 28), layout = (10, 4), bins = 20, 
+                  color = 'lightsteelblue', edgecolor = 'firebrick', linewidth = 1.5)
+plt.tight_layout()
+```
+
+![img](https://i.imgur.com/3fv56bE.png)
+
+
+We won't go into details about each feature, but in general we can observe that:
+
+- Some feautures, such as 'LowQualFinSF' and 'PoolArea', display low variance (or variability), which means that they are close to being constant. Therefore, they do not provide any information to a ML model for learning the patterns in the data and they should be removed,
+
+- Different attributes have different scales and we need to take care of that at the processing stage,
+- Most attributes are continuous (e.g. 'LotFrontage'), but there are some discrete ones ('FullBath', 'YrSold', etc.), and
+- The target variable ('SalePrice') deviates from the symmetrical bell curve of the normal distribution. We will explore this in greater detail later.
+
+We can write a function to isolate features with low variance:
+
+```python
+def low_variance(df, thd = 0.95):
+    columns = []
+    for column in df.columns:
+        values = df[column].value_counts(normalize = True) # normalize = True --> relative frequencies of the unique values
+        if (values > thd).sum() > 0:                       # sum > 0 means that there is one value greater than the threshold
+            columns.append(column)
+    return columns
+
+thd = 0.95
+columns_low_var = low_variance(numeric_atts, thd)
+
+print ('Numeric attributes with mostly the same value (> {}%): '.format(thd))
+print (*columns_low_var, sep = ',\n')
+```
+```
+Numeric attributes with mostly the same value (> 0.95%): 
+LowQualFinSF,
+KitchenAbvGr,
+3SsnPorch,
+PoolArea,
+MiscVal
+```
+
+Let's now plot a boxplot for every continuous attribute:
+
+```python
+discrete_n_atts = ['OverallQual', 'OverallCond', 'BsmtFullBath', 'FullBath', 'HalfBath', 
+                   'BedroomAbvGr', 'TotRmsAbvGrd', 'Fireplaces', 'GarageCars', 'MoSold', 'YrSold']
+continuous_n_atts = np.setdiff1d(numeric_atts.columns, discrete_n_atts)
+
+fig = plt.figure(figsize = (15, 22))
+flierprops = dict(marker = 'o', markerfacecolor = 'r', markeredgecolor = 'k', markersize = 9)
+
+for index, column in enumerate(continuous_n_atts):
+    
+    plt.subplot(7, 4, index + 1)
+    sns.boxplot(x = column, data = train_df, color = 'mediumseagreen', flierprops = flierprops)
+    plt.xticks(rotation = 90)
+    
+fig.tight_layout()
+```
+
+![img](https://i.imgur.com/x66hwt2.png)
+
+- Most of the attributes suffer from outliers, and
+- For some attributes, the min, max and the interquantile range 'collapse' into a line. That's because these attributes consist of mostly one value (for example, see '3SsnPorch' and 'PoolArea').
+
+
+### Dependent Feature : SalePrice
+
+```python
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (12, 4))
+
+sns.distplot(train_df['SalePrice'], color = 'darkslateblue', ax = ax1)
+sns.boxplot(train_df['SalePrice'], color = 'slateblue', ax = ax2)
+ax2.set_xticks([0, 200000, 400000, 600000])
+
+#skewness and kurtosis
+print('Skewness: {}'.format( np.round(train_df['SalePrice'].skew(), 2) ))
+print('Kurtosis: {}'.format( np.round(train_df['SalePrice'].kurt(), 2) ))
+```
+```
+Skewness: 1.88
+Kurtosis: 6.54
+```
+![img](https://i.imgur.com/bbk15Dy.png)
+
+Our target variable deviates from the symmetrical bell curve we would expect from a normal distribution. Specifically, it is right-skewed (similar terms: right-tailed or skewed to the right) since the right tail is longer.
+
+This could be a problem since many ML algorithms don't do well with data that are not normally distributed. We can correct for this by performing a **log-transformation** of the target variable:
+
+**Note**: we should not forget to take the inverse of this transformation (np.expm1).
+
+```python
+train_df['SalePrice-log'] = np.log1p(train_df['SalePrice'])
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (12, 4))
+
+sns.distplot(train_df['SalePrice-log'], color = 'darkslateblue', ax = ax1)
+sns.boxplot(train_df['SalePrice-log'], color = 'darkslateblue', ax = ax2)
+
+#skewness and kurtosis
+print('Skewness: {}'.format( np.round(train_df['SalePrice-log'].skew(), 2) ))
+print('Kurtosis: {}'.format( np.round(train_df['SalePrice-log'].kurt(), 2) ))
+```
+```
+Skewness: 0.12
+Kurtosis: 0.81
+```
+![img](https://i.imgur.com/k7EIt5M.png)
+
+We can visually observe that our target variable appears more normally distributed now. Both the skewness (measure of the asymmetry) and kurtosis (measure of the tailedness) of the distribution decreased after the transformation.
+
+Note that we should also take care of skewness present in the predictor variables. This will be done in the **preprocessing** stage
+
+```python
+fig = plt.figure(figsize = (18, 37))
+
+for index, column in enumerate(cat_atts):
+    
+    plt.subplot(11, 4, index + 1)
+    sns.countplot(x = column, data = train_df, palette = 'Set1')
+    plt.xticks(rotation = 90)
+    
+fig.tight_layout()
+```
+![img](https://i.imgur.com/SxWgfN1.png)
+
+- Most categotical features are nominal,
+- gain, some of them have mostly one value/category (see 'Street' as an example)
+
+```python
+thd = 0.95
+columns_low_var = low_variance(cat_atts, thd)
+
+print ('Categorical attributes with mostly the same value (> {}%): '.format(thd))
+print (*columns_low_var, sep = ',\n')
+```
+```
+Categorical attributes with mostly the same value (> 0.95%): 
+Street,
+Utilities,
+Condition2,
+RoofMatl,
+Heating,
+GarageQual,
+GarageCond
+```
+
+### Bivariate Analysis
+
+- So far, we examined each feature individually. Bivariate analysis refers to the analysis of bivariate data with the goal of determining if a relationship between two features exists
+
+- By using the `corr()` method, we can calculate how much each feature (linearly-)correlates with 'SalePrice':
+
+```python
+correlations = numeric_atts.select_dtypes(exclude = ['object']).corr()
+correlations = correlations[['SalePrice']].sort_values(by = ['SalePrice'], ascending = False)
+correlations.style.background_gradient(cmap = 'Blues', axis = 0)
+```
+
+```
+
+------------------SalePrice
+SalePrice	        1.000
+OverallQual	        0.791
+GrLivArea	        0.709
+GarageCars	        0.640
+GarageArea	        0.623
+TotalBsmtSF	        0.614
+1stFlrSF	        0.606
+FullBath	        0.561
+TotRmsAbvGrd	    0.534
+YearBuilt	        0.523
+YearRemodAdd	    0.507
+GarageYrBlt	        0.486
+MasVnrArea	        0.477
+Fireplaces	        0.467
+BsmtFinSF1      	0.386
+LotFrontage	        0.352
+WoodDeckSF	        0.324
+2ndFlrSF	        0.319
+OpenPorchSF	        0.316
+HalfBath	        0.284
+LotArea	            0.264
+BsmtFullBath    	0.227
+BsmtUnfSF	        0.214
+BedroomAbvGr    	0.168
+ScreenPorch	        0.111
+PoolArea	        0.092
+MoSold	            0.046
+3SsnPorch	        0.045
+BsmtFinSF2	        -0.011
+BsmtHalfBath	    -0.017
+MiscVal	            -0.021
+LowQualFinSF	    -0.026
+YrSold	            -0.029
+OverallCond	        -0.078
+MSSubClass	        -0.084
+EnclosedPorch	    -0.129
+KitchenAbvGr	    -0.136
+```
+
+Our target variable is highly (positively) correlated with:
+- Overall material and finish quality ('OverallQual'),
+- Above grade (ground) living area square feet ('GrLivArea'),
+- Size of garage in car capacity ('GarageCars'),
+- Size of garage in square feet ('GarageArea'), and
+- First Floor square feet ('1stFlrSF')
+
+It's not a surprise that people pay more for bigger houses and houses with garage space. Note that 'GarageCars' and 'GarageArea' convey similar information, therefore we need to check for multicollinearity.
+
+'SalePrice' is not affected (-0.10 < correlation < 0.10) from:
+- 'MoSold': Month Sold,
+- 'YrSold': Year Sold,
+- 'MSSubClass': The building class,
+- . . .
+
+Additionally, we can visually extract information about correlations by using Seaborn's `regplot()`. This could also help us detect any non-linear relationships.
+
+```python
+fig = plt.figure(figsize = (20, 30))
+
+for index, column in enumerate(numeric_atts.columns):
+    
+    plt.subplot(8, 5, index+1)
+    sns.regplot(x = column, y = 'SalePrice', data = train_df, ci = None,
+                color = 'steelblue', line_kws = {'color': 'firebrick'})
+
+fig.tight_layout()
+```
+![img](https://i.imgur.com/daJPkrv.png)
+
+Finally, we can use plot a correlation matrix which can help us identify multicollinear features.
+
+We read in Investopedia that _'multicollinearity is the occurrence of high intercorrelations among two or more independent variables in a multiple regression model'._
+
+The same source explaing why we should avoid it: _'Multicollinearity can lead to skewed or misleading results when a researcher or analyst attempts to determine how well each independent variable can be used most effectively to predict or understand the dependent variable in a statistical model.'_
+
+In the following figure, I have used a mask so that only correlations > 0.75 are highlighted:
+
+```python
+plt.figure(figsize = (15, 13))
+
+corr_matrix = numeric_atts.corr()
+sns.heatmap(corr_matrix, mask = corr_matrix < 0.75, linewidth = 1, cmap = 'Reds');
+```
+![img](https://i.imgur.com/wPCw0Rr.png)
+
+There are four sets of highly correlated features:
+- 'GarageArea' and 'GarageCars', just as we expected,
+- 'GarageYrBlt' and 'YearBuilt',
+- 'TotRmsAbvGrd' and 'GrLivArea', and
+- '1stFlrSF' and 'TotalBsmtSF'.
+
+We should remove one feature from each set during the preprocessing state.
+
+### Conclusion
+
+- Our training set has a total of 80 attributes + the target variable ('SalePrice'),
+- Many attributes contain missing values. A closer look reveals that a NaN value may not always indicate a missing value. For imputation, we should consult the description of each attribute to select the best strategy,
+- Numeric attributes have different scales,
+- Many attributes (both numeric and categorical) display low variance,
+- Many attributes contain outliers,
+- Bivariate analysis reveals which attributes display a higher correlation with 'SalePrice'. It also reveals four sets of highly multicollinear attributes.
+
+We are going to merge the two dataframes into one. The new dataframe will have NaN in the 'SalePrice' column for instances of the test set:
+
+```python
+all_data = pd.concat([train_df, test_df]).reset_index(drop = True)
+
+print ('The combined dataset has {} rows and {} columns'.format(all_data.shape[0], all_data.shape[1]))
+print ("Number of NaN values in 'SalePrice': ", all_data['SalePrice'].isnull().sum())
+```
+```
+The combined dataset has 2919 rows and 82 columns
+Number of NaN values in 'SalePrice':  1459
+```
+'Id' is unique to each instance and can be dropped:
+```python
+all_data.drop('Id', axis = 1, inplace = True)
+print("'Id' dropped!")
+```
+```
+'Id' dropped!
+```
+
+## Data Preprocessing
+
+### Outliers
+The documentation for the [Ames Housing Data](http://jse.amstat.org/v19n3/decock.pdf) states that there are outliers present in the training set and suggests we plot 'SalePrice' against 'GrLivArea' (i.e. 'Above ground living area square feet') to see them:
+
+```python
+sns.scatterplot(x = 'GrLivArea', y = 'SalePrice', data = train_df)
+plt.show()
+```
+![img](https://i.imgur.com/SaNDlhI.png)
+
+The two points at the lower right part of the plot (extremely large area for a low price) could be classified as outliers.
+
+```python
+outliers_idx = train_df[train_df['GrLivArea'] > 4000].index
+all_data.drop(outliers_idx, inplace = True)
+
+print ('Outliers dropped!')
+
+# Uncomment the following line to check the new plot
+sns.scatterplot(x = 'GrLivArea', y = 'SalePrice', data = all_data)
+plt.show()
+```
+
+![img](https://i.imgur.com/ODbToWz.png)
+
+We should note that there are other outliers present in the dataset. We will tackle this problem by making our models robust to them.
+
+## Missing Values
+
+### PoolQC, MiscFeature, Alley, Fence and FireplaceQu
+
+Someone would argue that we need to discard these attributes since they have a large number of missing values. However, after reading the description, it turns out that these values are not actually missing:
+
+- 'PoolQC': NA indicates 'No Pool',
+- 'MiscFeature': NA indicates 'No miscellaneous feature',
+- 'Alley': NA represents 'No alley access',
+- 'Fence': NA indicates 'No Fence', and
+- 'FireplaceQu': NA means 'No Fireplace'.
+
+Therefore, we should fill missing values with a string indicating the absence of what is been described:
+
+```python
+for column in ['PoolQC', 'MiscFeature', 'Alley', 'Fence', 'FireplaceQu']:
+    all_data[column] = all_data[column].fillna('None')
+
+print ("Columns 'PoolQC', 'MiscFeature', 'Alley', 'Fence', 'FireplaceQu': Imputation complete!")
+```
+```
+Columns 'PoolQC', 'MiscFeature', 'Alley', 'Fence', 'FireplaceQu':
+
+Imputation complete!
+```
+
+### LotFrontage
+This attribute represents the 'Linear feet of street connected to property'. I have decided to follow this notebook and replace missing values with the median 'LotFrontage' of the neighborhood. For this purpose, we need the groupby method:
+
+```python
+all_data['LotFrontage'] = all_data.groupby('Neighborhood')['LotFrontage'].transform(lambda x: x.fillna(x.median()))
+print ("Column [LotFrontage]: Imputation complete!")
+```
+```
+Column [LotFrontage]: Imputation complete!
+```
+
+### GarageQual, GarageFinish, GarageCond, and GarageType
+For this set of categorical attributes, NA indicates 'No Garage'.
+```python
+for column in ['GarageQual', 'GarageFinish', 'GarageCond', 'GarageType']:
+    all_data[column] = all_data[column].fillna('None')
+
+print ("Columns 'GarageQual', 'GarageFinish', 'GarageCond', 'GarageType': Imputation complete!")
+```
+```
+Columns 'GarageQual', 'GarageFinish', 'GarageCond', 'GarageType':
+
+Imputation complete!
+
+```
+
+### GarageYrBlt, GarageArea and GarageCars
+These attributes are numeric and their missing values are related to the absence of a garage. Therefore, we could replace them with 0:
+
+```python
+for column in ['GarageYrBlt', 'GarageArea', 'GarageCars']:
+    all_data[column] = all_data[column].fillna(0)
+    
+print ("Columns 'GarageYrBlt', 'GarageArea', 'GarageCars': Imputation complete!")
+```
+```
+Columns 'GarageYrBlt', 'GarageArea', 'GarageCars': Imputation complete!
+
+```
+
+### BsmtCond, BsmtExposure, BsmtQual, BsmtFinType2, BsmtFinType1
+These features are categorical and an NA value indicates that there is 'no basement'.
+
+```python
+for column in ['BsmtCond', 'BsmtExposure', 'BsmtQual', 'BsmtFinType2', 'BsmtFinType1']:
+    all_data[column] = all_data[column].fillna('None')
+    
+print ("Columns 'BsmtCond', 'BsmtExposure', 'BsmtQual', 'BsmtFinType2', 'BsmtFinType1': Imputation complete!")
+```
+```
+Columns 'BsmtCond', 'BsmtExposure', 'BsmtQual', 'BsmtFinType2', 'BsmtFinType1':
+
+Imputation complete!
+```
+
+### BsmtFinSF1, BsmtFinSF2, BsmtUnfSF, TotalBsmtSF, BsmtHalfBath and BsmtFullBath
+We will replace missing values for this set with 0.
+
+```python
+for column in ['BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'TotalBsmtSF', 'BsmtHalfBath', 'BsmtFullBath']:
+    all_data[column] = all_data[column].fillna(0)
+    
+print ("Columns 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'TotalBsmtSF', 'BsmtHalfBath', 'BsmtFullBath': Imputation complete!")
+```
+```
+Columns 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF', 'TotalBsmtSF', 'BsmtHalfBath', 'BsmtFullBath':
+
+Imputation complete!
+```
+
+### Remaining Attributes
+I won't go into details about the remaing attributes that need to be imputed. You can read the description to understand why I choose the particular value in each case.
+
+```python
+all_data['MasVnrType'] = all_data['MasVnrType'].fillna('None')
+all_data['MasVnrArea'] = all_data['MasVnrArea'].fillna(0)
+
+for column in ['MSZoning', 'Functional', 'Utilities', 'SaleType', 
+              'Exterior1st', 'Exterior2nd', 'KitchenQual', 'Electrical']:
+    all_data[column] = all_data[column].fillna(train_df[column].mode()[0])
+    
+print("Remaining columns: Imputation complete!")
+```
+```
+Remaining columns: Imputation complete!
+```
+
+**Note:** For the last 8 attributes, we fill the missing values with the most frequent entry of the training set only. This ensures that information from outside the training set won't be used to create ML modes, thus protecting our models from data leakage.
+
+### Changing Data Type
+The attribute 'MSSubClass' identifies the type of dwelling involved in the sale and is written so that it maps categories to integer values (such as '1-STORY 1946 & NEWER ALL STYLES' to 20, etc.) We can change its data type to string by using the `astype()` method.
+
+We will also use the same method for changing three other columns to string.
+
+```python
+cols_dtype = ['MSSubClass', 'YrSold', 'MoSold', 'OverallCond']
+all_data[cols_dtype] = all_data[cols_dtype].astype(str)
+
+print('Data type changed successfully!')
+```
+```
+Data type changed successfully!
+```
+
+## Feature Engineering
+
+The goal of Feature Engineering is to create useful new features from our existing ones. Specifically, we will merge the area-related features ('TotalBsmtSF', '1stFlrSF' and '2ndFlrSF') into one new features titled 'TotalSF'. Some models can calculate the importance of each feature in the final prediction, and 'TotalSF' is indeed a very important/useful feature (as we will see later).
+
+I also tried other ideas such as a 'TotalLot' feature ('LotArea' + 'LotFrontage'), but they weren't as important as 'TotalSF'.
+
+
+```python
+all_data['TotalSF'] = all_data['TotalBsmtSF'] + all_data['1stFlrSF'] + all_data['2ndFlrSF']
+print("Feature 'TotalSF' has been created!")
+```
+```
+Feature 'TotalSF' has been created!
+```
+
+## Dealing with Skewed Features
+I didn't know much about dealing with skewed features before this competition. Serigne's notebook helped me a lot!
+
+Skewness is a measure of the asymmetry of the distribution of a variable, and if there is too much of it in our data, some models may perform poorly.
+
+We will use **Box-Cox transformation** for highly skewed data.
+
+Let's have a look at the most skewed features of our **training set** (again, we have to be careful for data leakage):
+
+```python
+numeric_feats = all_data.iloc[:1458].drop('SalePrice', axis = 1).dtypes[all_data.iloc[:1458].dtypes != 'object'].index
+
+skewed_feats = all_data.iloc[:1458][numeric_feats].apply(lambda x: skew(x.dropna())).sort_values(ascending=False)
+skewness = pd.DataFrame({'Skew': skewed_feats})
+
+skewness.head(10)
+```
+
+```
+
+--------------Skew
+MiscVal	      20.549
+PoolArea	  17.517
+LotArea	      12.580
+3SsnPorch	  10.287
+LowQualFinSF  8.996
+KitchenAbvGr  4.480
+BsmtFinSF2    4.245
+BsmtHalfBath  4.128
+ScreenPorch   4.100
+EnclosedPorch 3.084
+```
+
+```python
+skewness = skewness[abs(skewness) > 0.75]
+print('There are {} skewed numerical features for Box-Cox transformation!'.format(skewness.shape[0]))
+```
+
+```
+There are 34 skewed numerical features for Box-Cox transformation!
+```
+```python
+skewed_features = skewness.index
+lam = 0.15
+for feat in skewed_features:
+
+    all_data.loc[:1458, feat] = boxcox1p(all_data.loc[:1458, feat], lam)
+    all_data.loc[1458:, feat] = boxcox1p(all_data.loc[1458:, feat], lam)
+    
+print('Box-Cox transformation applied successfully!')
+```
+```
+Box-Cox transformation applied successfully!
+```
+
+## Feature Selection
+EDA can confirm that some features display **low variance** which means that they are close to being constant. Therefore, they do not provide any information to a ML model for learning the patterns in the data and they **should be removed.**
+
+I have writen a simple for loop for identifying such features based on a threshold value (0.95 in our case, i.e. features in which 95% of instances have the same value):
+
+```python
+thd = 0.95
+cols_drop = []
+
+for column in train_df.drop('SalePrice', axis = 1):
+    
+    most_freq_value = train_df[column].value_counts(normalize = True).iloc[0]
+    if (most_freq_value > thd):
+        cols_drop.append(column)
+        print ('{}: {}% same value'.format(column, np.round(most_freq_value, 3)))
+        
+all_data.drop(cols_drop, axis = 1, inplace = True)
+print('\nFeatures with low variance dropped successfully!')
+```
+```
+Street: 0.996% same value
+Utilities: 0.999% same value
+Condition2: 0.99% same value
+RoofMatl: 0.982% same value
+Heating: 0.978% same value
+LowQualFinSF: 0.982% same value
+KitchenAbvGr: 0.953% same value
+GarageQual: 0.951% same value
+GarageCond: 0.962% same value
+3SsnPorch: 0.984% same value
+PoolArea: 0.995% same value
+MiscVal: 0.964% same value
+
+Features with low variance dropped successfully!
+```
+
+Additionally, EDA showed that some features exhibit multicollinearity. We can drop them now:
+
+```python
+all_data.drop(['GarageCars', 'GarageYrBlt', 'TotRmsAbvGrd', 'TotalBsmtSF'], axis = 1, inplace = True)
+print('Features dropped successfully!')
+```
+```
+Features dropped successfully!
+```
+
+### One-hot Encoding
+Almost there! Machine Learning models can only get trained on numerical data; that's why we need to convert 
+categorical variables into a form that is suitable for ML algorithms. One-hot encoding does exactly that: it substitutes every categorical column with  n  columns ( n : the number of categories), one for each of its categories. Every instance/row get the value of 1 for the column it corresponds to, and 0 for the remaining  n−1  columns.
+```python
+all_data_before = all_data.copy()
+
+all_data = pd.get_dummies(all_data)
+print ('One-hot encoding completed!\n')
+print ('Shape before: ', all_data_before.shape)
+print (' Shape after: ', all_data.shape)
+```
+```
+One-hot encoding completed!
+
+Shape before:  (2915, 66)
+Shape after:  (2915, 296)
+```
+Lastly, we need to split the combined dataset back into train and test set:
+
+```python
+train_df = all_data[:1456]
+
+X_train = train_df.drop(['SalePrice', 'SalePrice-log'], 1)
+y_train = train_df['SalePrice-log']
+
+#######################################################
+
+test_df = all_data[1457:]
+
+X_test = test_df.copy()
+X_test.drop('SalePrice', axis = 1, inplace = True)
+print ('Splitting: Done!')
+```
+```
+Splitting: Done!
+```
+Building Machine Learning Models We are ready to have some fun! Before we to that, we need to select a
+performance measure. I have picked the Root Mean Square Error (RMSE), a typical performance measure for regression
+problems that measures the standard deviation of the errors the system makes in its predictions:
+
+```mdx
+RMSE : Root mean squared error
+```
+
+## Baseline Models
+The aim of this subsection is to calculate the baseline performance of 5 different estimators/regressors on the training set. This will enable us to later see how tuning improves each of these models.
+
+The regressors are:
+
+1. LASSO Regression,
+2. Elastic Net Regression,
+3. Kernel Ridge Regression,
+4. Random Forest Regressor,
+5. GradientBoostingRegressor,
+6. XGBRegressor, and
+7. LightGBMRegressor.
+
+I will give a little bit more information about these models in the next subsection, when we will tune their performance.
+
+For the baseline models, we will use the default parameters for each regressor and evaluate performance by calculating the room mean squared error using **k-fold cross validation**.
+
+The idea behind k-fold cross validation, which is illustrated in the following figure, is simple: it splits the (training) set into k subsets/folds, trains the models using k-1 folds and evaluates the model on the remaining one fold. This process is repeated until every fold is tested once.
+
+```python title=Way-1
+n_folds = 5
+
+def rmsle_cv(model):
+    kf = KFold(n_folds, shuffle=True, random_state=42).get_n_splits(X_train.values)
+    rmse= np.sqrt(-cross_val_score(model, X_train.values, y_train, scoring="neg_mean_squared_error", cv = kf))
+    return rmse 
+
+lasso = make_pipeline(RobustScaler(), Lasso(alpha =0.0005, random_state=1))
+ENet = make_pipeline(RobustScaler(), ElasticNet(alpha=0.0005, l1_ratio=.9, random_state=3))
+KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
+GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
+                                   max_depth=4, max_features='sqrt',
+                                   min_samples_leaf=15, min_samples_split=10, 
+                                   loss='huber', random_state =5)
+model_xgb = xgb.XGBRegressor(colsample_bytree=0.4603, gamma=0.0468, 
+                             learning_rate=0.05, max_depth=3, 
+                             min_child_weight=1.7817, n_estimators=2200,
+                             reg_alpha=0.4640, reg_lambda=0.8571,
+                             subsample=0.5213, silent=1,
+                             random_state =7, nthread = -1)
+model_lgb = lgb.LGBMRegressor(objective='regression',num_leaves=5,
+                              learning_rate=0.05, n_estimators=720,
+                              max_bin = 55, bagging_fraction = 0.8,
+                              bagging_freq = 5, feature_fraction = 0.2319,
+                              feature_fraction_seed=9, bagging_seed=9,
+                              min_data_in_leaf =6, min_sum_hessian_in_leaf = 11)
+
+score = rmsle_cv(lasso)
+print("\nLasso score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+score = rmsle_cv(ENet)
+print("ElasticNet score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+score = rmsle_cv(KRR)
+print("Kernel Ridge score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+score = rmsle_cv(GBoost)
+print("Gradient Boosting score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+score = rmsle_cv(model_xgb)
+print("Xgboost score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+score = rmsle_cv(model_lgb)
+print("LGBM score: {:.4f} ({:.4f})\n" .format(score.mean(), score.std()))
+```
+
+```
+Lasso score: 0.0324 (0.0346)
+
+ElasticNet score: 0.0312 (0.0327)
+
+Kernel Ridge score: 0.0142 (0.0016)
+
+Gradient Boosting score: 0.0279 (0.0290)
+
+Xgboost score: 0.0388 (0.0262)
+
+LGBM score: 0.0315 (0.0269)
+```
+
+```python title=Way-2
+# Step 1: create a list containing all estimators with their default parameters
+est_list = [ElasticNet(alpha = 0.01, l1_ratio = 0.5, random_state = random_state),
+            RandomForestRegressor(random_state = random_state), 
+            GradientBoostingRegressor(random_state = random_state),
+            XGBRegressor(random_state = random_state),
+            LGBMRegressor(random_state = random_state)]
+
+
+# Step 2: calculate the cv mean and standard deviation for each one of them
+cv_base_mean, cv_std = [], []
+for est in est_list:  
+    
+    cv = cross_val_score(est, X_train, y = y_train, scoring = 'neg_root_mean_squared_error', cv = 5, n_jobs = -1)
+    cv_base_mean.append(-cv.mean())
+    cv_std.append(-cv.std())
+
+    
+# Step 3: create a dataframe and plot the mean with error bars
+cv_total = pd.DataFrame({'Algorithm': ['Elastic Net', 'Random Forest','GradientBoostingRegressor', 'XGBRegressor', 'LGBMRegressor'],
+                         'CV-Means': cv_base_mean, 
+                         'CV-Errors': cv_std})
+
+sns.barplot('CV-Means', 'Algorithm', data = cv_total, palette = 'Set3', orient = 'h', **{'xerr': cv_std})
+plt.xlabel('RMS Error')
+plt.title('Cross Validation Scores')
+plt.axvline(x = 0.15, color = 'firebrick', linestyle = '--');
+```
+![img](https://i.imgur.com/mozzRgB.png)
+
+## Model Tuning
+
+We are ready to tune hyperparameters using **grid search** and see if performance improves. Grid search (provided by scikit-learn's GridSeachCV) 'exhaustively generates candidate models from a grid of parameter values specified with the param_grid parameter'. It then evaluates each model using cross validation, thus allowing us to determine the optimal values for all hyperparameters.
+
+I won't go into detail about the hyperparameters of each model. If you want to know more, please visit the corresponding documentation.
+
+
+
+We write a simple performance reporting function (inspired from Ken's kernel). The function will:
+
+- Print the best score,
+- Print the best parameters (i.e. the parameters that lead to the best score), and
+- Append each CV score to a list (we will use it for plotting later).
+
+```python
+cv_tuned = []
+
+def Model_Performance(model_name, model):
+    print(model_name)
+    print('-----------------------------------------')
+    print('        Best Score: ', str(-model.best_score_)) # best_score_: Mean cross-validated score of the best_estimator
+    print('   Best Parameters: ', str(model.best_params_)) 
+    
+    arg_min = np.argmin(model.cv_results_['rank_test_score'])
+    scores_list = []
+    for i in ['split0_test_score', 'split1_test_score', 'split2_test_score', 'split3_test_score', 'split4_test_score']:
+        scores_list.append(-model.cv_results_[i][arg_min])
+    
+    cv_tuned.append({'Model': model_name, 
+                     'CV Scores': scores_list})
+    
+print ('Function ready!')
+```
+```
+Function ready!
+```
+
+### Elastic Net
+
+The first model is Elastic Net, a regularized regression model. In general, we prefer having a little bit of regularization in our models (to reduce overfitting), hence why we should avoid plain Linear Regression.
+
+Elastic Net is the middle ground between two other regularized linear regression models: Ridge and Lasso regression. The difference between each model lies in the regularization term of the cost function (please read Chapter 4 for more info).
+
+The parameter 'alpha' controls how much we want to regularize the model, while 'l1_ratio' controls the mix ratio between Ridge and Lasso's regularization terms (0 for 100% Ridge, and 1 for %100 Lasso).
+
+
+```python
+en = ElasticNet(random_state = random_state)
+
+param_grid = {'alpha': [0.0001, 0.001, 0.01, 0.1, 1], # constant that multiplies the penalty terms, default = 1.0
+              'l1_ratio': [0.25, 0.5, 0.75]} # the mixing parameter, default = 0.5
+
+en_grid = GridSearchCV(en, param_grid = param_grid, cv = 5,
+                       scoring = 'neg_root_mean_squared_error',
+                       verbose = True, n_jobs = -1)
+
+best_grid_en = en_grid.fit(X_train, y_train)
+Model_Performance('Elastic Net', best_grid_en)
+```
+```
+Fitting 5 folds for each of 15 candidates, totalling 75 fits
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+Elastic Net
+-----------------------------------------
+        Best Score:  0.021097013916384362
+   Best Parameters:  {'alpha': 0.0001, 'l1_ratio': 0.25}
+[Parallel(n_jobs=-1)]: Done  75 out of  75 | elapsed:    2.7s finished
+```
+
+### RandomForestRegressor
+To understand Random Forest, we first need to examine Decision Trees. Decision trees are versatile Machine Learning algorithms that make predictions by learning simple decision rules inferred from the features in our data.
+
+A Random Forest, as the name implies, consists of a large number of individual Decision Trees that are trained independently on a random subset of our data. This is a perfect example of **Ensemble Learning**.
+
+We should note that a Random Forest Regressor has all the hyperparameters of a Decision Tree (to control how trees grow), plus hyperparameters to control the ensemble itself (such as 'n_estimators').
+
+```python
+rf = RandomForestRegressor(random_state = random_state)
+param_grid = {'n_estimators': [300],    # the number of trees in the forest, default = 100
+              'bootstrap': [True],  # whether bootstrap samples are used when building trees
+              'max_depth': [10, 25, 50],  # the maximum depth of the tree, default = None
+              'max_features': ['auto','sqrt'],  # the number of features to consider when looking for the best split , default = ”auto”
+              'min_samples_leaf': [1, 2, 3],  # default = 1
+              'min_samples_split': [2, 3]}  # default = 2
+
+grid_rf = GridSearchCV(rf, param_grid = param_grid, cv = 5,
+                       scoring = 'neg_root_mean_squared_error',
+                       verbose = True, n_jobs = -1)
+
+best_grid_rf = grid_rf.fit(X_train, y_train)
+Model_Performance('Random Forest Regressor', best_grid_rf)
+```
+```
+Fitting 5 folds for each of 36 candidates, totalling 180 fits
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:  2.2min
+[Parallel(n_jobs=-1)]: Done 180 out of 180 | elapsed:  7.9min finished
+Random Forest Regressor
+-----------------------------------------
+        Best Score:  0.029738261591558308
+   Best Parameters:  {'bootstrap': True, 'max_depth': 25, 'max_features': 'auto', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 300}
+```
+
+### GradientBoostingRegressor
+Boosting is an Ensemble technique in which predictors are not made independently of each other, but sequentially. The general idea is to train predictors sequentially, each trying to correct its predecessor.
+
+Gradient boosting in particular works by fitting each new predictor to the residual errors made by the previous predictor. You can have a look at page 205 of this book to see how Gradient Boosting can improve an ensemble's prediction.
+
+We can use Scikit-learn's `GradientBoostingRegressor` class:
+
+```python
+gbr = GradientBoostingRegressor(random_state = random_state)
+
+param_grid = {'loss': ['ls', 'huber'],  # loss function to be optimized (default = ’ls’)
+              'n_estimators': [200],    # The number of boosting stages to perform (default = 100)
+              'learning_rate': [0.01, 0.1, 1],  # (default = 0.1)
+              'min_samples_split': [3, 5, 10],  # The minimum number of samples required to split an internal node (default = 2)
+              'max_depth': [3, 5, 10]}  # maximum depth of the individual regression estimators (default = 3)
+
+grid_gbr = GridSearchCV(gbr, param_grid, cv = 5,
+                        scoring = 'neg_root_mean_squared_error',
+                        verbose = True, n_jobs = -1)
+
+best_grid_gbr = grid_gbr.fit(X_train, y_train)
+Model_Performance('GradientBoostingRegressor', best_grid_gbr)
+```
+```
+Fitting 5 folds for each of 54 candidates, totalling 270 fits
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:  1.9min
+[Parallel(n_jobs=-1)]: Done 196 tasks      | elapsed:  8.6min
+[Parallel(n_jobs=-1)]: Done 270 out of 270 | elapsed:  9.7min finished
+GradientBoostingRegressor
+-----------------------------------------
+        Best Score:  0.027885724196814694
+   Best Parameters:  {'learning_rate': 0.1, 'loss': 'ls', 'max_depth': 3, 'min_samples_split': 10, 'n_estimators': 200}
+```
+
+### XGBRegressor
+We can also use XGBRegressor() from the XGBoost library which is 'an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable'.
+
+```python
+xgb = XGBRegressor(random_state = random_state)
+param_grid = {'learning_rate' : [0.01, 0.1, 0.5], # Boosting learning rate
+              'n_estimators' : [200],       # Number of gradient boosted trees
+              'max_depth' : [3, 6, 10],     # Maximum depth of a tree. Increasing this value will make the model more complex and more likely to overfit.
+              'min_child_weight' : [1, 5, 10],  # Increasing this value will make model more conservative.
+              'reg_alpha' : [0.01, 0.1, 1],  # Increasing this value will make model more conservative.
+              'reg_lambda' : [0.01, 0.1, 1]}  # Increasing this value will make model more conservative.
+
+grid_xgb = GridSearchCV(xgb, param_grid = param_grid, cv = 5,
+                        scoring = 'neg_root_mean_squared_error',
+                        return_train_score = True,
+                        verbose = True, n_jobs = -1)
+
+best_grid_xgb = grid_xgb.fit(X_train, y_train)
+Model_Performance('XGBRegressor', best_grid_xgb)
+```
+```
+Fitting 5 folds for each of 243 candidates, totalling 1215 fits
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:   37.8s
+[Parallel(n_jobs=-1)]: Done 196 tasks      | elapsed:  2.7min
+[Parallel(n_jobs=-1)]: Done 446 tasks      | elapsed:  6.2min
+[Parallel(n_jobs=-1)]: Done 796 tasks      | elapsed: 15.4min
+[Parallel(n_jobs=-1)]: Done 1215 out of 1215 | elapsed: 21.8min finished
+[21:14:53] WARNING: /workspace/src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.
+XGBRegressor
+-----------------------------------------
+        Best Score:  0.027553225701404525
+   Best Parameters:  {'learning_rate': 0.1, 'max_depth': 3, 'min_child_weight': 1, 'n_estimators': 200, 'reg_alpha': 0.1, 'reg_lambda': 0.01}
+```
+### LGBMRegressor
+LightGBM is another gradient boosting framework (developed by Microsoft) that uses tree based learning algorithms.
+
+```python
+lgbm = LGBMRegressor(random_state = random_state)
+param_grid = {'max_depth' : [5, 10, 15],    # Maximum tree depth, <=0 means no limit (default = -1)
+              'learning_rate' : [0.01, 0.1],    # Boosting learning rate (default = 0.1)
+              'n_estimators' : [250, 500],   # Number of boosted trees to fit (default = 100)
+              'feature_fraction' : [0.4, 0.6, 0.8], # 
+              'min_child_samples' : [5, 10, 20]} # Minimum number of data needed in a leaf (default = 20)
+
+grid_lgbm = GridSearchCV(lgbm, param_grid, cv = 5,
+                         scoring = 'neg_root_mean_squared_error',
+                         verbose = True, n_jobs = -1)
+
+best_grid_lgbm = grid_lgbm.fit(X_train, y_train)
+Model_Performance('LGBMRegressor', best_grid_lgbm)
+```
+```
+Fitting 5 folds for each of 108 candidates, totalling 540 fits
+[Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+[Parallel(n_jobs=-1)]: Done  46 tasks      | elapsed:   14.9s
+[Parallel(n_jobs=-1)]: Done 196 tasks      | elapsed:  1.1min
+[Parallel(n_jobs=-1)]: Done 446 tasks      | elapsed:  3.3min
+[Parallel(n_jobs=-1)]: Done 540 out of 540 | elapsed:  4.0min finished
+LGBMRegressor
+-----------------------------------------
+        Best Score:  0.02948995514200986
+   Best Parameters:  {'feature_fraction': 0.8, 'learning_rate': 0.1, 'max_depth': 5, 'min_child_samples': 20, 'n_estimators': 500}
+```
+After performing cross-validation on the best set of parameter for each algorithm, we can now compare theis performance before and after tuning:
+
+```python
+cv_tuned_mean = [np.round(np.mean(cv_tuned[i]['CV Scores']), 4) for i in range(len(cv_tuned))]
+
+cv_total = pd.DataFrame({'Algorithm': ['Elastic Net', 'Random Forest', 'GradientBoostingRegressor', 'XGBRegressor', 'LGBMRegressor'],
+                         'Baseline': cv_base_mean, 
+                         'Tuned Performance': cv_tuned_mean})
+
+cv_total.style.highlight_min(color = 'lightskyblue', axis = 1)
+```
+
+```
+
+-   Algorithm	                Baseline   Tuned Performance
+0	Elastic Net	                 0.032    	0.021
+1	Random Forest	             0.030   	0.030
+2	GradientBoostingRegressor	 0.028  	0.028
+3	XGBRegressor	             0.028  	0.028
+4	LGBMRegressor	             0.030	    0.029
+
+```
+Tuning indeed improved performance for all models! Apart from the Random Forest Regressor, all other models have a similar mean RMSE around 0.021.
+
+### Feature importance
+We can visualize feature importance for each of the three last regressors (I will only show the 15th most important features, but you can show more by changing the 'n_features_vis' variable):
+
+```python
+boosting_reg = [{'Name': 'GradientBoostingRegressor', 'Model': best_grid_gbr.best_estimator_, 'Color': 'darkgray'},
+                {'Name': 'XGBRegressor', 'Model': best_grid_xgb.best_estimator_, 'Color': 'cadetblue'},
+                {'Name': 'LGBMRegressor', 'Model': best_grid_lgbm.best_estimator_, 'Color': 'steelblue'}]
+
+n_features_vis = 15
+
+fig, ax = plt.subplots(nrows = 1, ncols = 3, figsize = (18, 6))
+
+for i in range(len(boosting_reg)):
+    importances = pd.DataFrame({'Feature': X_train.columns,
+                                'Importance': np.round(boosting_reg[i]['Model'].feature_importances_, 4)})
+    importances = importances.sort_values('Importance', ascending = False).set_index('Feature')
+    
+    most_important = importances.head(n_features_vis).iloc[::-1]
+    
+    ax[i].set_title(boosting_reg[i]['Name'])
+    most_important.plot.barh(color = boosting_reg[i]['Color'], edgecolor = 'firebrick', legend = False, ax = ax[i])
+      
+plt.tight_layout()
+plt.show()
+```
+
+![img](https://i.imgur.com/J3vtQVk.png)
+
+Notice how important 'TotalSF' is! Feature engineering proved quite useful in our case. You could try engineering new features and see if they make it to the top15 list.
+
+Additionally, it's not a surprise that features such as 'OverallQual', 'GrLivArea' and 'GarageCars' play a significant role in predicting the final price.
+
+## Learning Curves
+Learning curves are plots of a model’s performance on the training set and the validation set as a function of the training set size. They can help us visualize overfitting/underfitting and the effect of the training size on a model's error.
+
+To generate these curves, simply train the model several times on different sized subsets of the training set:
+
+```python
+boosting_reg = [{'Name': 'Elastic Net', 'Model': best_grid_en.best_estimator_},
+#                 {'Name': 'Random Forest', 'Model': best_grid_rf.best_estimator_},
+                {'Name': 'GradientBoostingRegressor', 'Model': best_grid_gbr.best_estimator_},
+                {'Name': 'XGBRegressor', 'Model': best_grid_xgb.best_estimator_},
+                {'Name': 'LGBMRegressor', 'Model': best_grid_lgbm.best_estimator_,}]
+
+def plot_learning_curve(estimators, X, y, nrows, ncols, cv = None, train_sizes = np.linspace(0.1, 1.0, 5)):
+
+    plt.figure(1)
+    fig, axes = plt.subplots(nrows, ncols, figsize = (15, 12))
+    
+    index = 0
+    for row in range(nrows):
+        for col in range(ncols):
+            if (index == len(boosting_reg)): continue
+            
+            estimator = estimators[index]
+            title = estimators[index]['Name']
+            axes[row, col].set_title(title)
+            
+            axes[row, col].set_xlabel('Training Examples')
+            axes[row, col].set_ylabel('Score')
+            
+            train_sizes, train_scores, test_scores = learning_curve(estimators[index]['Model'], X, y, cv = cv, n_jobs = -1, 
+                                                                    train_sizes = train_sizes, scoring = 'neg_mean_squared_error')
+    
+            train_scores, test_scores = np.sqrt(-train_scores), np.sqrt(-test_scores)
+    
+            train_scores_mean, train_scores_std = np.mean(train_scores, axis = 1), np.std(train_scores, axis = 1)
+            test_scores_mean, test_scores_std = np.mean(test_scores, axis = 1), np.std(test_scores, axis = 1)
+            
+            axes[row, col].grid()
+            axes[row, col].fill_between(train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, 
+                                     alpha = 0.1, color = 'r')
+            axes[row, col].fill_between(train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, 
+                                     alpha = 0.1, color = 'g')
+            axes[row, col].plot(train_sizes, train_scores_mean, 'ro-', label = 'Training Score')
+            axes[row, col].plot(train_sizes, test_scores_mean, 'go-', label = 'Cross-validation Score')
+            axes[row, col].legend(loc = 'best')
+            
+            index += 1
+            
+#     fig.delaxes(axes[1, 2])
+            
+    plt.tight_layout()
+    plt.show()
+    
+plot_learning_curve(boosting_reg, X_train, y_train, nrows = 2, ncols = 2, cv = 5, train_sizes = np.linspace(0.1, 1.0, 5));
+```
+
+![img](https://i.imgur.com/BB445LO.png)
+
+We note that:
+
+- The error on the training set is always lower compared to the validation set (no surprise there, all models perform worse on unseen data),
+- There is a significant gap between the two curves for all models, meaning that they perform better on the instances of the training set than on the validation set. Unfortunately, this indicates overfitting.
+
+
+We can visually compare its mean RMSE with the remaining models:
+
+```python
+models = ['Elastic Net','Random Forest Regressor', 'GradientBoostingRegressor', 'XGBRegressor', 'LGBMRegressor']
+
+fig = plt.figure(figsize = (14, 6))
+
+sns.pointplot(x = models, y = cv_tuned_mean, color = 'firebrick', markers = 'o', linestyles = '-')
+
+for index, score in enumerate(cv_tuned_mean):
+    plt.text(index + 0.08, score - 0.0001, '{:.4f}'.format(score), 
+             color = 'black', fontsize = 15, weight = 'semibold')
+
+plt.title('Mean Score Comparison', size = 24)
+plt.xlabel('Model', size = 20, labelpad = 12)
+plt.ylabel('Mean Score (RMSE)', size = 20, labelpad = 12)
+plt.tick_params(axis = 'x', labelsize = 15, rotation = 25)
+plt.tick_params(axis = 'y', labelsize = 15)
+```
+
+![img](https://i.imgur.com/b8bciWP.png)
+
+
+> tried out with RandomSearchCV 
+
+
+**Boosting**
+works on a class of weak learners, improving them into strong learners. It is being improved sequentially where the misclassified instances will be given more weights so that during the subsequent training, the learner will place more emphasis in correcting the previously misclassfied instance, less so on the already correctly identified instances. Over time, the eventual learner will possess the ability to predict accurately as a result of learning from past mistakes
+
+**LightGBM**
+
+LightBGM is another gradient boosting framework developed by Microsoft that is based on decision tree algorithm, designed to be efficient and distributed. Some of the advantages of implementing LightBGM compared to other boosting frameworks include:
+
+- Faster training speed and higher efficiency (use histogram based algorithm i.e it buckets continuous feature values into discrete bins which fasten the training procedure)
+- Lower memory usage (Replaces continuous values to discrete bins which result in lower memory usage)
+- Better accuracy
+- Support of parallel and GPU learning
+- Capable of handling large-scale data (capable of performing equally good with large datasets with a significant reduction in training time as compared to XGBOOST)
+LightGBM splits the tree leaf wise with the best fit whereas other boosting algorithms split the tree depth wise or level wise rather than leaf-wise. This leaf-wise algorithm reduces more loss than the level-wise algorithm, hence resulting in much better accuracy which can rarely be achieved by any of the existing boosting algorithms.
+
+```python title=LightBGM
+"""
+Learn more avout LightBGM parameters at 
+https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMRegressor.html
+"""
+
+lgbm = LGBMRegressor(boosting_type='gbdt',objective='regression', max_depth=-1,
+                    lambda_l1=0.0001, lambda_l2=0, learning_rate=0.1,
+                    n_estimators=100, max_bin=200, min_child_samples=20, 
+                    bagging_fraction=0.75, bagging_freq=5,
+                    bagging_seed=7, feature_fraction=0.8,
+                    feature_fraction_seed=7, verbose=-1)
+
+param_lst = {
+    'max_depth' : [2, 5, 8, 10],
+    'learning_rate' : [0.001, 0.01, 0.1, 0.2],
+    'n_estimators' : [100, 300, 500, 1000, 1500],
+    'lambda_l1' : [0.0001, 0.001, 0.01],
+    'lambda_l2' : [0, 0.0001, 0.001, 0.01],
+    'feature_fraction' : [0.4, 0.6, 0.8],
+    'min_child_samples' : [5, 10, 20, 25]
+}
+
+lightgbm = RandomizedSearchCV(estimator = lgbm, param_distributions = param_lst,
+                              n_iter = 100, scoring = 'neg_root_mean_squared_error',
+                              cv = 5)
+       
+lightgbm_search = lightgbm.fit(X_train, y_train)
+
+# LightBGM with tuned hyperparameters
+best_param = lightgbm_search.best_params_
+lgbm = LGBMRegressor(**best_param)
+```
+**XGBoost**
+
+Extreme Gradient Boost (XGB) is a boosting algorithm that uses the gradient boosting framework; where gradient descent algorithm is employed to minimize the errors in the sequential model. It improves on the gradient boosting framework with faster execution speed and improved performance.
+
+```python title=XGBRegressor
+'''
+Find out more on the XGBRegressor implementation and parameters at 
+https://xgboost.readthedocs.io/en/latest/parameter.html#parameters-for-tree-booster
+'''
+
+# xgb = XGBRegressor(booster='gbtree', learning_rate=0.3, n_estimators=3460,
+#                     max_depth=6, min_child_weight=1, subsample=1,
+#                     gamma=0, reg_alpha = 0.001, colsample_bytree=0.7,
+#                     objective='reg:squarederror', reg_lambda = 0.001,
+#                     scale_pos_weight=1, seed=2020)
+
+xgb = XGBRegressor(booster='gbtree', objective='reg:squarederror')
+
+from sklearn.model_selection import RandomizedSearchCV
+
+param_lst = {
+    'learning_rate' : [0.01, 0.1, 0.15, 0.3, 0.5],
+    'n_estimators' : [100, 500, 1000, 2000, 3000],
+    'max_depth' : [3, 6, 9],
+    'min_child_weight' : [1, 5, 10, 20],
+    'reg_alpha' : [0.001, 0.01, 0.1],
+    'reg_lambda' : [0.001, 0.01, 0.1]
+}
+
+xgb_reg = RandomizedSearchCV(estimator = xgb, param_distributions = param_lst,
+                              n_iter = 100, scoring = 'neg_root_mean_squared_error',
+                              cv = 5)
+       
+xgb_search = xgb_reg.fit(X_train, y_train)
+
+# XGB with tune hyperparameters
+best_param = xgb_search.best_params_
+xgb = XGBRegressor(**best_param)
+```
+
+**Catboost**
+
+Catboost is another alternative gradient boosting framework developed by Yandex. The word "Catboost" is derived from two words; "Category" and "Boosting". This means that Catboost itself can deal with categorical features which usually has to be converted to numerical encodings in order to feed into traditional gradient boost frameworks and machine learning models.
+The 2 critical features in Catboost algorithm is the use of ordered boosting and innovative algorithm for processing categorical features, which fight the prediction shift caused by a special kind of target leakage present in all existing implementations of gradient boosting algorithms.
+Find out more [here](https://towardsdatascience.com/https-medium-com-talperetz24-mastering-the-new-generation-of-gradient-boosting-db04062a7ea2)
+
+```python title=CatBoost
+cb = CatBoostRegressor(loss_function='RMSE', logging_level='Silent')
+param_lst = {
+    'n_estimators' : [100, 300, 500, 1000, 1300, 1600],
+    'learning_rate' : [0.0001, 0.001, 0.01, 0.1],
+    'l2_leaf_reg' : [0.001, 0.01, 0.1],
+    'random_strength' : [0.25, 0.5 ,1],
+    'max_depth' : [3, 6, 9],
+    'min_child_samples' : [2, 5, 10, 15, 20],
+    'rsm' : [0.5, 0.7, 0.9],
+    
+}
+
+catboost = RandomizedSearchCV(estimator = cb, param_distributions = param_lst,
+                              n_iter = 100, scoring = 'neg_root_mean_squared_error',
+                              cv = 5)
+
+catboost_search = catboost.fit(X_train, y_train)
+
+# CatBoost with tuned hyperparams
+best_param = catboost_search.best_params_
+cb = CatBoostRegressor(logging_level='Silent', **best_param)
+```
+
+```python
+model_performances = pd.DataFrame({
+    "Model" : ["XGBoost", "LGBM", "CatBoost"],
+    "CV(5)" : [str(cv_xgb)[0:5], str(cv_lgbm)[0:5], str(cv_cb)[0:5]],
+    "MAE" : [str(mae_xgb)[0:5], str(mae_lgbm)[0:5], str(mae_cb)[0:5]],
+    "RMSE" : [str(rmse_xgb)[0:5], str(rmse_lgbm)[0:5], str(rmse_cb)[0:5]],
+    "Score" : [str(score_xgb)[0:5], str(score_lgbm)[0:5], str(score_cb)[0:5]]
+})
+
+print("Sorted by Score:")
+print(model_performances.sort_values(by="Score", ascending=False))
+```
+```
+Sorted by Score:
+-------Model  CV(5)     MAE   RMSE   Score
+1      LGBM   0.909   0.078  0.110   0.917
+0   XGBoost   0.909   0.079  0.112   0.915
+2  CatBoost   -542.   0.073  0.104   -557.
+```
+
+
+## Blending
+Blending is a technique that give different weightage to different algorithms that will affect their influence of the predictions. Such techniques can help to improve performance since it uses a variety of models as predictors. Special thanks to @itslek for the implementation of blending. I have randomly chosen the weights for each models in this case, however, you can improve on this by futher tuning the weightage to be given to each model to achieve a better accuracy!
+
+```python
+def blend_models_predict(X, b, c, d):
+  return ((b* xgb.predict(X)) + (c * lgbm.predict(X)) + (d * cb.predict(X)))
+
+subm = np.exp(blend_models_predict(test, 0.4, 0.3, 0.3))
+```
