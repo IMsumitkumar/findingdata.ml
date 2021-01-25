@@ -1,0 +1,193 @@
+---
+title: 'Important functions for daily use'
+description: ljsbvsb
+---
+
+### Adjusted R squared function
+```
+Adjusted R squared
+```
+```python
+def adj_r2(x,y):
+    r2 = regression.score(x,y)
+    n = x.shape[0]
+    p = x.shape[1]
+    adjusted_r2 = 1-(1-r2)*(n-1)/(n-p-1)
+    return adjusted_r2
+```
+
+### VIF- Variance Influence factor
+```
+VIF - For removing Multicollinearity
+```
+```python
+scaler =StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = X_scaled
+
+# we create a new data frame which will include all the VIFs
+# note that each variable has its own variance inflation factor as this measure is variable specific (not model specific)
+# we do not include categorical values for mulitcollinearity as they do not provide much information as numerical ones do
+vif = pd.DataFrame()
+
+# here we make use of the variance_inflation_factor, which will basically output the respective VIFs 
+vif["VIF"] = [variance_inflation_factor(variables, i) for i in range(variables.shape[1])]
+# Finally, I like to include names so it is easier to explore the result
+vif["Features"] = X.columns
+```
+
+```
+As a thumb rule, a VIF value greater than 5 means a very severe multicollinearity. 
+Drop of go for remedies for those Features.
+```
+
+---
+
+
+<br />
+
+### Regression
+
+Suppose Linear regression is have 75% score on training and 73% on test data that means overfitting? let's check
+
+1. LassoCV
+```python
+lasscv = LassoCV(alphas = None,cv =10, max_iter = 100000, normalize = True)
+lasscv.fit(x_train, y_train)
+```
+```
+LassoCV(alphas=None, copy_X=True, cv=10, eps=0.001, fit_intercept=True,
+    max_iter=100000, n_alphas=100, n_jobs=None, normalize=True,
+    positive=False, precompute='auto', random_state=None,
+    selection='cyclic', tol=0.0001, verbose=False)
+```
+```python
+alpha = lasscv.alpha_
+alpha
+```
+```
+3.0341655445178153e-05
+```
+Now train on Lasso
+
+```python
+lasso_reg = Lasso(alpha)
+lasso_reg.fit(x_train, y_train)
+```
+```python
+lasso_reg.score(x_test, y_test)
+```
+
+Good performance
+
+
+2. Ridge
+
+```python
+alphas = np.random.uniform(low=0, high=10, size=(50,))
+ridgecv = RidgeCV(alphas = alphas,cv=10,normalize = True)
+ridgecv.fit(x_train, y_train)
+ridgecv.alpha_
+```
+```
+0.8432446610176114
+```
+
+```python
+ridge_model = Ridge(alpha=ridgecv.alpha_)
+ridge_model.fit(x_train, y_train)
+ridge_model.score(x_test, y_test)
+```
+```
+good work
+```
+
+3. Elastic net 
+
+```python
+# Elastic net
+
+elasticCV = ElasticNetCV(alphas = None, cv =10)
+
+elasticCV.fit(x_train, y_train)
+
+elasticCV.alpha_
+```
+```
+0.5
+```
+```python
+elasticnet_reg = ElasticNet(alpha = elasticCV.alpha_,l1_ratio=0.5)
+elasticnet_reg.fit(x_train, y_train)
+```
+```python
+elasticnet_reg.score(x_test, y_test)
+```
+```
+Work better on unseen data
+```
+
+We can check overfitting by this also.
+
+---
+
+4. **Polynomial Regression**
+
+Many times we may face a requirement where we have to do a regression, but when we plot a graph between a dependent and independent variables, the graph doesn't turn out to be a linear one
+
+```python
+# Linear regression also work good but not best
+from sklearn.preprocessing import PolynomialFeatures
+poly_reg = PolynomialFeatures(degree = 2)  #trying to create a 2 degree polynomial equation. It simply squares the x as shown in the output
+X_poly = poly_reg.fit_transform(x)
+print(X_poly)
+poly_reg.fit(X_poly, y)
+```
+```
+[[  1.   1.   1.]
+ [  1.   2.   4.]
+ [  1.   3.   9.]
+ [  1.   4.  16.]
+ [  1.   5.  25.]
+ [  1.   6.  36.]
+ [  1.   7.  49.]
+ [  1.   8.  64.]
+ [  1.   9.  81.]
+ [  1.  10. 100.]]
+```
+```python
+lin_reg_2 = LinearRegression()
+lin_reg_2.fit(X_poly, y)
+```
+```python
+# Visualising the Polynomial Regression results
+plt.scatter(x, y, color = 'red')
+plt.plot(x, lin_reg_2.predict(poly_reg.fit_transform(x)), color = 'blue')
+plt.title('Polynomial Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+```
+![img](https://i.imgur.com/mpFhLVy.png)
+
+```python
+# Fitting Polynomial Regression to the dataset
+poly_reg1 = PolynomialFeatures(degree = 4)
+X_poly1 = poly_reg1.fit_transform(x)
+poly_reg1.fit(X_poly, y)
+lin_reg_3 = LinearRegression()
+lin_reg_3.fit(X_poly1, y)
+```
+
+```python
+# Visualising the Polynomial Regression results
+plt.scatter(x, y, color = 'red')
+plt.plot(x, lin_reg_3.predict(poly_reg1.fit_transform(x)), color = 'blue')
+plt.title('Polynomial Regression of Degree 4')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+```
+![img](https://i.imgur.com/HoFBLLZ.png)

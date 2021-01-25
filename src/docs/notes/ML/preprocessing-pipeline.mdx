@@ -1,0 +1,207 @@
+---
+title: 'Data Preprocessing help'
+description: some methods
+---
+```
+private content: for me(admin) only.
+```
+
+## Outliers
+
+### Why Outliers
+- Human error
+- Measurement error
+- Variablility in data
+
+### What is the imapact of outliers on our model
+- Various prblm on statisticl analysis
+- It may cause significant cause on mean and the standard deviation
+### How to iedntify the outliers using graphs
+- Box plot
+- Scatter plot
+### How to identify (methods)
+- Standard deviation method
+```python
+## Standard deviation method (when data has normal or guassian distribution)
+
+data_mean = data.mean()
+data_std = data.std()
+
+cut_off = data_std * 3
+lower_bound, upper_bound = data_mean - cut_off, data_mean + cut_off
+
+# identify outliers
+outliers = [x for x in data if x < lower_bound or x > upper_bound]
+
+# remove outliers
+outliers_removed = [x for x in data if x > lower and x < upper]
+```
+- Zscore
+```python
+## ZScore
+
+z_values = np.abs(stats.zscore(data))
+
+threshold = 3
+print(np.where(z>3))
+
+data_o = data_o[(z>3).all(axis=1)]
+```
+- IQR
+```python
+## Inter quartile range (for lower skewed data)
+
+q25 = percentile(data, 25)
+q75 = percentile(data, 75)
+
+IQR = q75 - q25
+
+cut_off = IQR * 1.5 
+
+lower_bound, upper_bound = q25-cut_off, q75+cut_off
+
+# identify outliers
+outliers = [x for x in data if x < lower_bound or x > upper_bound]
+
+# remove outliers
+ourliers_removed = [x for x in data if x>lower_bound and x<upper_bound]
+```
+```python title=for-highly-skewed-data
+## Inter quartile range (for highly skewed data)
+
+q25 = percentile(data, 25)
+q75 = percentile(data, 75)
+
+IQR = q75 - q25
+
+cut_off = IQR * 3 
+
+lower_bound, upper_bound = q25-cut_off, q75+cut_off
+
+# identify outliers
+outliers = [x for x in data if x < lower_bound or x > upper_bound]
+
+# remove outliers
+ourliers_removed = [x for x in data if x>lower_bound and x<upper_bound]
+```
+- box-cox transform can also be used for highly skewed data
+- log transformation 
+```
+np.log(data[i])
+don't forget to inverse.
+```
+- Isolation forest
+
+### Should we rermove outliers?
+- depend on the use case
+- suppose u have card fraud detection dataset. U must have anamoly to detecct the frauds
+- one more exmaple or sales data where there are spikes in data which are very important and are ouliers compared to the normal data
+
+---
+```
+Z score = (i - mean) / std. deviation
+
+68% of the data points lie between +/- 1 standard deviation.
+95% of the data points lie between +/- 2 standard deviation
+99.7% of the data points lie between +/- 3 standard deviation
+```
+
+## Categorical Feature Encoding
+
+
+## Ordinal Encoding
+WHen feature categories have a order with them
+```
+(low, medium, high)
+```
+### OrdinalEncoding
+```python
+OrdinalEncoder() from sklearn
+```
+
+### LabelEncoding
+```python
+LabelEncoder() from sklearn
+```
+
+### Target Guided Ordinal Encoding
+```python
+"""
+    [ordinal the labels accrding to the target,
+    Replace the value by joiint probability of being 1 or 0,
+    highest mean -> highest rank]
+"""
+ordinal_labls = data.groupby([i])[target].mean().sort_values().index
+lvl_dict = {k:i for i, k in enumerate(ordinal_labls, 0)}
+data[i] = data[i].map(lvl_dict)
+```
+
+## Nominal Encoding
+When features categories have not ordered associated wiith them
+```
+(state, fruits etc)
+```
+### One hot Encoding
+
+```python
+OnehotEncoding from sklearn
+get_dummies from pandas
+
+pd.get_dummies(data, drop_first=True)
+```
+### KDD Orange (Extension of one hot encoding)
+
+what if a feature have more than 500 diffrent categories,
+
+SOLUTION -> (KDD ORange research paper) limit one hot encoding to the 10 most frequent labels of the feature
+```python
+# lets find the most frequent top 10 categories for thr variable i
+data[i].value_counts().sort_values(ascending=False).head(10)
+    
+# grab them
+top_labels = [y for y in data[i].value_counts().sort_values(ascending=False).head(10).index]
+    
+def one_hot_encoding(data, variable, top):
+    for label in top:
+        data[variable+'_'+label] = np.where(data[variable]==label, 1, 0)
+
+# Advantages
+"""
+Straight forward,
+does not require for variale exploration,
+low feature space,
+"""
+
+# Disadvantages
+"""
+Does not add any information that make the variable more predictive,
+does not keep the information of ignored variable]
+"""
+```
+### Mean Encoding
+
+```python 
+"""
+    [Monotic relationship between label and target,
+    Capture the info within the labels,
+    Prones to overfitting]
+    EX - PINCODE
+"""
+dict_val= data.groupby([i])[target].mean().to_dict()
+data[i] = data[i].map(dict_val)
+```
+
+### Count / Frequency encoding
+
+```python
+"""
+    [Replace each label of the categorical variable by the count,
+    this is amount of time a categry appeas inside a feature,
+    Does not increase the feature space]
+    
+    [If some of labels have same count, Then diff categry replace with 
+    the same count result that it will loose a lot of information]
+"""
+count = data[i].value_counts().to_dict()
+data[i] = data[i].map(count)
+```
