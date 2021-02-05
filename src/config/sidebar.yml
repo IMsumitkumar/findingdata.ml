@@ -9,6 +9,9 @@
 - label: 'Find me'
   link: '/contact'
 
+- label: 'Thanks KAGGLE'
+  link: '/thanks-kaggle'
+
 - label: Recent Projects
   items:
     - label: 'Developers Community'
