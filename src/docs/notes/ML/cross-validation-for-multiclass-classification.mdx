@@ -1,0 +1,104 @@
+---
+title: CV for Multilabel classification
+description: best cross validation technique for multi class classification problems.
+---
+
+```python
+# ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+import pandas as pd
+# !pip install iterative-stratification
+# stratified kfold for multilabel classification
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+from sklearn import tree
+from sklearn import metrics
+
+def kfolds(df):
+    # we add a kfold column in main dataframe
+    # why? beacuse it's easy to filter by it for training
+    # and for validation. also, if we split like this,
+    # our splits are consistant throughout the traning
+    # and for any kind of model
+    df.loc[:, "kfold"] = -1
+    
+    # I like to shuffle data like this
+    df = df.sample(frac=1).reset_index(drop=True)
+    
+    # In my dataset, MSSubClass is the independent feature
+    # So, i dropped that so that i can get my dependent 
+    # feature as targets along with kfolds
+    targets = df.drop("MSSubClass", axis=1).values
+    
+    # init MultilabelStratifiedKFold
+    mskf = MultilabelStratifiedKFold(n_splits=5)
+    
+    # loop over the folds
+    # assign the value of validation fold to 
+    # kfold column by valifation index
+    for fold, (trn_, val_) in enumerate(mskf.split(X=df, y=targets)):
+        # print(len(trn_), len(val_))
+        df.loc[val_, "kfold"] = fold
+        
+    # save the modified dataframe
+    df.to_csv("train_folds.csv", index=False)
+
+def run(fold):
+    # read the data with folds
+    df = pd.read_csv("train_folds.csv")
+    
+    # traning data where kfold is not equal to provided fold
+    # also, we reset the index
+    df_train = df[df.kfold != fold].reset_index(drop=True)
+    
+    # validation data where kfold is equals to provided fold
+    df_valid = df[df.kfold == fold].reset_index(drop=True)
+    
+    # drop the target column from the dataframe and convert
+    # it into a numpy array usinf .values
+    # target is "SaleCondition" in the dataframe
+    X_train = df_train.drop("SaleCondition", axis=1).values
+    y_train = df_train.SaleCondition.values
+    
+    # Similiarly, for validation, we have
+    X_valid = df_valid.drop("SaleCondition", axis=1).values
+    y_valid = df_valid.SaleCondition.values
+    
+    # init DecisionTreeClassifier
+    clf = tree.DecisionTreeClassifier()
+    
+    # fit the model on traning data
+    clf.fit(X_train, y_train)
+    
+    # create the predictions for validation samples
+    y_pred = clf.predict(X_valid)
+    
+    # calculate the accuracy and print it 
+    accuracy = metrics.accuracy_score(y_valid, y_pred)
+    print(f"Fold={fold}, Accuracy={accuracy}")
+    
+if __name__ == '__main__':
+    df = pd.read_csv("train.csv")
+    # i have picked only one dependent feature
+    # and one independent feature for simplicity
+    """
+    Independent : "MSSubClass"
+    Dependent   : "SaleCondition"
+    """
+    df = df[['MSSubClass', 'SaleCondition']]
+    kfolds(df)
+    run(fold=0)
+    run(fold=1)
+    run(fold=2)
+    run(fold=3)
+    run(fold=4)
+```
+```
+Fold=0, Accuracy=0.821917808219178
+Fold=1, Accuracy=0.797945205479452
+Fold=2, Accuracy=0.8356164383561644
+Fold=3, Accuracy=0.8184931506849316
+Fold=4, Accuracy=0.8287671232876712
+```
+
