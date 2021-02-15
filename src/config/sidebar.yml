@@ -12,6 +12,9 @@
 - label: 'Thanks KAGGLE'
   link: '/thanks-kaggle'
 
+- label: 'Join Discord'
+  link: '/join-discord'
+
 - label: Recent Projects
   items:
     - label: 'Developers Community'
