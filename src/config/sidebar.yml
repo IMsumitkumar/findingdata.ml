@@ -12,6 +12,9 @@
 - label: 'Thanks KAGGLE'
   link: '/thanks-kaggle'
 
+- label: 'Motivation'
+  link: '/motivate-yourself'
+
 - label: 'Join Discord'
   link: '/join-discord'
 

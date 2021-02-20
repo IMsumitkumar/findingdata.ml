@@ -8,10 +8,11 @@
   "starter-name": "sumit-portfolio",
   "dependencies": {
     "@rocketseat/gatsby-theme-docs": "^2.2.4",
-    "gatsby": "^2.25.3",
+    "gatsby": "^2.32.4",
     "gatsby-plugin-canonical-urls": "^2.3.12",
     "gatsby-plugin-google-analytics": "^2.3.15",
     "gatsby-plugin-google-fonts": "^1.0.1",
+    "gatsby-plugin-instagram-embed": "^2.0.1",
     "gatsby-plugin-manifest": "^2.4.33",
     "gatsby-plugin-offline": "^3.2.30",
     "gatsby-plugin-remove-trailing-slashes": "^2.3.13",
@@ -27,12 +28,14 @@
   "devDependencies": {},
   "keywords": [
     "data-science",
-    "data", 
-    "statistics","central-tendency",
+    "data",
+    "statistics",
+    "central-tendency",
     "machine-learning",
     "skewness",
     "kurtosis",
-    "findingdata.ml","findingdata",
+    "findingdata.ml",
+    "findingdata",
     "gatsby-starter"
   ],
   "scripts": {
