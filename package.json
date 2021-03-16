@@ -1,6 +1,6 @@
 {
   "name": "sumit-portfolio",
-  "private": true,
+  "private": false,
   "version": "1.0.0",
   "description": "A personal and blogspot website for learners in data Science field",
   "author": "Sumit Kumar",

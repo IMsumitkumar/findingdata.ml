@@ -40,7 +40,7 @@
       link: '/notes/DS/all-collection'
 
     - label: 'Statistics'
-      link: 'notes/stats/all-stats'
+      link: '/notes/stats/all-stats'
 
     - label: 'Machine Learning'
       link: '/notes/ML/all-ml'
